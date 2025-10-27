@@ -22,6 +22,16 @@
 </head>
 
 <body>
+
+    <!-- Botão de Configuração -->
+    <div class="settings-container">
+        <button id="settingsBtn" class="settings-btn" title="Configurações">⚙️</button>
+        <div id="settingsDropdown" class="settings-dropdown" style="display: none;">
+            <button id="rotateTeamsBtn">Girar Times</button>
+            <button id="invertLayoutBtn">Layout Frente a Frente</button>
+        </div>
+    </div>
+
     <!-- Banner de Truco -->
     <div id="trucoBanner" style="display:none;">
         <span id="trucoBannerText"></span>
@@ -130,6 +140,50 @@
     </div>
 
     <script>
+        // Dropdown de configurações
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsDropdown = document.getElementById('settingsDropdown');
+        settingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            settingsDropdown.style.display = settingsDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        document.body.addEventListener('click', () => {
+            settingsDropdown.style.display = 'none';
+        });
+
+        // Alternar rotação dos times
+        let rotatedTeam = null; // null, 1 ou 2
+        document.getElementById('rotateTeamsBtn').addEventListener('click', () => {
+            const team1 = document.getElementById('team1');
+            const team2 = document.getElementById('team2');
+            if (!rotatedTeam || rotatedTeam === 2) {
+                team1.style.transform = '';
+                team2.style.transform = 'rotate(180deg)';
+                rotatedTeam = 1;
+            } else {
+                team2.style.transform = '';
+                team1.style.transform = 'rotate(180deg)';
+                rotatedTeam = 2;
+            }
+        });
+
+        // Alternar layout frente a frente
+        let invertedLayout = false;
+        document.getElementById('invertLayoutBtn').addEventListener('click', () => {
+            const teamsContainer = document.querySelector('.teams-container');
+            const trucoActions = document.getElementById('trucoActions');
+            if (!invertedLayout) {
+                teamsContainer.classList.add('inverted-layout');
+                trucoActions.classList.add('centered-truco');
+                invertedLayout = true;
+            } else {
+                teamsContainer.classList.remove('inverted-layout');
+                trucoActions.classList.remove('centered-truco');
+                invertedLayout = false;
+            }
+        });
+
+        // Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
