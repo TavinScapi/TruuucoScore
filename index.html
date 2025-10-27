@@ -18,23 +18,111 @@
     <meta name="apple-mobile-web-app-title" content="TS" />
     <script src="script.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+    <style>
+        /* =========================
+   CONFIGURAÇÕES DROPDOWN
+========================= */
+        .config-container {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 100;
+        }
 
+        #configBtn {
+            background: #3b2f2f;
+            color: #f1c40f;
+            font-size: 22px;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+        }
+
+        #configBtn:hover {
+            transform: rotate(25deg);
+        }
+
+        .config-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 55px;
+            background: #2f2424;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .config-menu button {
+            background: #f1c40f;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .config-menu button:hover {
+            background: #d4ac0d;
+        }
+
+        /* =========================
+   LAYOUTS
+========================= */
+
+        /* Estado padrão (lado a lado) */
+        .teams-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            transition: all 0.4s ease;
+        }
+
+        /* Quando ativar o layout invertido */
+        .inverted-layout .teams-container {
+            flex-direction: column-reverse;
+            align-items: center;
+        }
+
+        /* Time 2 girado (mesa invertida) */
+        .rotated-team {
+            transform: rotate(180deg);
+            transition: transform 0.4s ease;
+        }
+
+        /* Truco centralizado entre os times */
+        .inverted-layout #trucoActions {
+            order: -1;
+            margin: 15px 0;
+        }
+
+        /* Animação suave */
+        .container,
+        .team {
+            transition: all 0.4s ease;
+        }
+    </style>
 </head>
 
 <body>
-
-    <!-- Botão de Configuração -->
-    <div class="settings-container">
-        <button id="settingsBtn" class="settings-btn" title="Configurações">⚙️</button>
-        <div id="settingsDropdown" class="settings-dropdown" style="display: none;">
-            <button id="rotateTeamsBtn">Girar Times</button>
-            <button id="invertLayoutBtn">Layout Frente a Frente</button>
-        </div>
-    </div>
-
     <!-- Banner de Truco -->
     <div id="trucoBanner" style="display:none;">
         <span id="trucoBannerText"></span>
+    </div>
+
+    <!-- Botão de Configurações -->
+    <div class="config-container">
+        <button id="configBtn">⚙️</button>
+        <div id="configMenu" class="config-menu">
+            <button id="rotateTeamsBtn">🔁 Girar Times</button>
+        </div>
     </div>
 
     <div class="container">
@@ -140,50 +228,6 @@
     </div>
 
     <script>
-        // Dropdown de configurações
-        const settingsBtn = document.getElementById('settingsBtn');
-        const settingsDropdown = document.getElementById('settingsDropdown');
-        settingsBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            settingsDropdown.style.display = settingsDropdown.style.display === 'block' ? 'none' : 'block';
-        });
-        document.body.addEventListener('click', () => {
-            settingsDropdown.style.display = 'none';
-        });
-
-        // Alternar rotação dos times
-        let rotatedTeam = null; // null, 1 ou 2
-        document.getElementById('rotateTeamsBtn').addEventListener('click', () => {
-            const team1 = document.getElementById('team1');
-            const team2 = document.getElementById('team2');
-            if (!rotatedTeam || rotatedTeam === 2) {
-                team1.style.transform = '';
-                team2.style.transform = 'rotate(180deg)';
-                rotatedTeam = 1;
-            } else {
-                team2.style.transform = '';
-                team1.style.transform = 'rotate(180deg)';
-                rotatedTeam = 2;
-            }
-        });
-
-        // Alternar layout frente a frente
-        let invertedLayout = false;
-        document.getElementById('invertLayoutBtn').addEventListener('click', () => {
-            const teamsContainer = document.querySelector('.teams-container');
-            const trucoActions = document.getElementById('trucoActions');
-            if (!invertedLayout) {
-                teamsContainer.classList.add('inverted-layout');
-                trucoActions.classList.add('centered-truco');
-                invertedLayout = true;
-            } else {
-                teamsContainer.classList.remove('inverted-layout');
-                trucoActions.classList.remove('centered-truco');
-                invertedLayout = false;
-            }
-        });
-
-        // Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
@@ -192,6 +236,49 @@
             });
         }
     </script>
+
+    <script>
+        const configBtn = document.getElementById('configBtn');
+        const configMenu = document.getElementById('configMenu');
+        const rotateBtn = document.getElementById('rotateTeamsBtn');
+        const invertBtn = document.getElementById('invertLayoutBtn');
+        const container = document.querySelector('.container');
+        const team1 = document.getElementById('team1');
+        const team2 = document.getElementById('team2');
+        const teamsContainer = document.querySelector('.teams-container');
+
+        let rotated = false;
+        let inverted = false;
+
+        // Mostrar / esconder menu
+        configBtn.addEventListener('click', () => {
+            configMenu.style.display = configMenu.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        // Fechar menu ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.config-container')) {
+                configMenu.style.display = 'none';
+            }
+        });
+
+        // Opção 1 — Girar Times alternadamente
+        rotateBtn.addEventListener('click', () => {
+            if (!rotated) {
+                team2.classList.add('rotated-team');
+                rotated = 'team2';
+            } else if (rotated === 'team2') {
+                team2.classList.remove('rotated-team');
+                team1.classList.add('rotated-team');
+                rotated = 'team1';
+            } else {
+                team1.classList.remove('rotated-team');
+                rotated = false;
+            }
+        });
+    </script>
+
+
 </body>
 
 </html>
