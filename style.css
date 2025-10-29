@@ -1,413 +1,499 @@
-/* ===== RESET E BASE ===== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+:root {
+    --bg-color: #f8f8f8;
+    --card-bg: #ffffff;
+    --text-primary: #bababd;
+    --text-secondary: #8a8a8e;
+    --icon-bg: #f0f0f0;
+    --black-btn: #c5c5c5;
+    --shadow: 0 4px 14px rgba(206, 175, 175, 0.08);
+    --transition: 0.25s ease;
+    --overlay-bg: rgba(0, 0, 0, 0.5);
+    --modal-bg: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #121212;
+        --card-bg: #1e1e1e;
+        --text-primary: #f5f5f5;
+        --text-secondary: #b0b0b0;
+        --icon-bg: #2a2a2a;
+        --black-btn: #fff;
+        --shadow: 0 4px 14px rgba(255, 255, 255, 0.05);
+        --modal-bg: #2d2d2d;
+    }
+}
+
+/* -------------------------------
+       🧱 BASE GLOBAL
+    --------------------------------*/
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background: radial-gradient(circle at center, #6e6161 0%, #35241a 100%);
-    font-family: 'Georgia', serif;
-    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    min-height: 100vh;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
-}
-
-/* ===== CONTAINER PRINCIPAL ===== */
-.container {
-    max-width: 500px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-}
-
-header {
-    text-align: center;
-}
-
-.subtitle {
-    font-size: 1.2rem;
-    margin-bottom: 25px;
-    color: #e0cba8;
-    opacity: 0.8;
-}
-
-/* ===== TÍTULO ===== */
-.container h1 {
-    font-size: 40px;
-    font-family: 'Bangers', cursive;
-    color: #F1C40F;
-    transform: rotate(-3deg);
-    -webkit-text-stroke: 2px #2B1B0E;
-    text-shadow:
-        2px 2px #2B1B0E,
-        3px 3px #2B1B0E,
-        4px 4px #2B1B0E,
-        5px 5px #2B1B0E,
-        6px 6px #2B1B0E;
-}
-
-.container h1 span {
-    color: #3DA13D;
-    -webkit-text-stroke: 2px #2B1B0E;
-    text-shadow:
-        2px 2px #2B1B0E,
-        3px 3px #2B1B0E,
-        4px 4px #2B1B0E,
-        5px 5px #2B1B0E,
-        6px 6px #2B1B0E;
-}
-
-/* ===== TIMES ===== */
-.teams-container {
-    display: flex;
-    gap: 10px;
-}
-
-.team {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s;
-    width: 100px;
-    height: 400px;
-}
-
-.team.active {
-    transform: scale(1.03);
-    box-shadow: 0 0 0 2px #f1c40f;
-}
-
-/* ===== NOME DO TIME ===== */
-.team-header {
-    width: 100%;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    margin-bottom: 10px;
+}
+
+.screen-container {
+    width: 100%;
+    max-width: 600px;
+    padding: 24px;
     position: relative;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* -------------------------------
+       🃏 CABEÇALHO
+    --------------------------------*/
+header {
+    position: relative;
+    margin-bottom: 36px;
+}
+
+header h1 {
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+header p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.header-card {
+    position: absolute;
+    top: -20px;
+    right: 10px;
+    width: 70px;
+    transform: rotate(15deg);
+    opacity: 0.9;
+    animation: floatCard 4s ease-in-out infinite;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+}
+
+@keyframes floatCard {
+
+    0%,
+    100% {
+        transform: rotate(15deg) translateY(0);
+    }
+
+    50% {
+        transform: rotate(13deg) translateY(-8px);
+    }
+}
+
+/* -------------------------------
+       ⚙️ SEÇÕES
+    --------------------------------*/
+section {
+    margin-bottom: 32px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.section-header h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.section-header i {
+    font-size: 1.3rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.section-header i:hover {
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+/* -------------------------------
+       🧩 CARDS DE CONFIGURAÇÃO
+    --------------------------------*/
+.settings-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    background-color: var(--card-bg);
+    padding: 16px;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.setting-item:hover {
+    transform: translateY(-2px);
+}
+
+.item-icon-bg {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background-color: var(--icon-bg);
+    display: grid;
+    place-items: center;
+    margin-right: 16px;
+}
+
+.item-icon-bg i {
+    font-size: 1.4rem;
+    color: var(--text-primary);
+}
+
+.item-text h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.item-text p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* -------------------------------
+       🏳️ EQUIPES
+    --------------------------------*/
+.team-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.team-card {
+    background-color: var(--card-bg);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 16px;
+    transition: var(--transition);
+}
+
+.team-card:hover {
+    transform: translateY(-2px);
 }
 
 .team-name {
-    width: 100%;
-    text-align: center;
-    background: transparent;
-    border: none;
-    color: #e8d8b5;
-    font-size: 1.1rem;
-    font-weight: bold;
-    padding: 5px;
-    margin-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    outline: none;
-}
-
-.edit-icon {
-    position: absolute;
-    right: 5px;
-    color: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    transition: color 0.3s;
-}
-
-.edit-icon:hover {
-    color: #f1c40f;
-}
-
-/* ===== PLACAR ===== */
-.score {
-    font-size: 4rem;
-    font-weight: bold;
-    margin: 10px 0;
-    transition: all 0.3s;
-}
-
-.score.increase {
-    animation: scoreIncrease 0.5s;
-}
-
-.score.decrease {
-    animation: scoreDecrease 0.5s;
-}
-
-/* ===== ANIMAÇÕES ===== */
-@keyframes scoreIncrease {
-
-    0%,
-    100% {
-        transform: scale(1);
-        color: #fff;
-    }
-
-    50% {
-        transform: scale(1.3);
-        color: #2ecc71;
-    }
-}
-
-@keyframes scoreDecrease {
-
-    0%,
-    100% {
-        transform: scale(1);
-        color: #fff;
-    }
-
-    50% {
-        transform: scale(0.8);
-        color: #e74c3c;
-    }
-}
-
-/* ===== CONTROLES ===== */
-.controls {
     display: flex;
-    gap: 10px;
-    width: 100%;
-    margin-top: -5px;
-}
-
-button {
-    flex: 1;
-    padding: 12px 18px;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
+    align-items: center;
     font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.team-name i {
+    margin-right: 8px;
+    color: #555;
+}
+
+.edit-team {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: var(--transition);
 }
 
-button:hover,
-.truco-btn:hover,
-.reset-btn:hover {
+.edit-team:hover {
+    color: var(--text-primary);
+    transform: scale(1.15);
+}
+
+/* -------------------------------
+       ▶️ BOTÃO INICIAR
+    --------------------------------*/
+.start-button-container {
+    margin-top: 40px;
+}
+
+.start-button {
+    width: 100%;
+    padding: 18px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: var(--black-btn);
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.start-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-button:active,
-.truco-btn:active,
-.reset-btn:active {
-    transform: scale(0.92);
     filter: brightness(0.9);
 }
 
-/* ===== TIPOS DE BOTÕES ===== */
-.increase-btn {
-    background: #3d8b40;
-    color: #fff;
-    box-shadow: inset 0 -3px 0 #2d662f;
+.start-button:active {
+    transform: scale(0.98);
 }
 
-.decrease-btn {
-    background: #a23a3a;
-    color: #fff;
-    box-shadow: inset 0 -3px 0 #6e2222;
-}
-
-.truco-btn {
-    margin: 20px 0;
-    background: #d4af37;
-    color: #222;
-    font-size: 1.2rem;
-    border-radius: 10px;
-    box-shadow: inset 0 -4px 0 #a8821e;
-}
-
-.reset-container {
-    display: flex;
-    gap: 20px;
-}
-
-.reset-btn {
-    background: #3b2c20;
-    color: #e0cba8;
-    border: 1px solid #7a6241;
-    padding: 12px 20px;
-    border-radius: 10px;
-}
-
-/* ===== VITÓRIAS ===== */
-.victories {
-    display: flex;
-    justify-content: center;
-    gap: 5px;
-}
-
-.victory-star {
-    font-size: 1.5rem;
-    opacity: 0.3;
-    transition: opacity 0.3s;
-}
-
-.victory-star.active {
-    opacity: 1;
-    color: #f1c40f;
-}
-
-/* ===== MODAL DE VITÓRIA ===== */
-.victory-modal {
+/* -------------------------------
+       🎯 MODAL DE EDIÇÃO
+    --------------------------------*/
+.modal-overlay {
     position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--overlay-bg);
+    display: none;
     justify-content: center;
     align-items: center;
-    z-index: 100;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
 }
 
-.victory-modal.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.victory-content {
-    background: #3c2f2f;
-    border: 2px solid #d4af37;
-    color: #f8f3e7;
-    padding: 25px 30px;
-    border-radius: 12px;
-    text-align: center;
-    max-width: 90%;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-    transform: scale(0.7);
-    transition: transform 0.3s;
-}
-
-.victory-modal.active .victory-content {
-    transform: scale(1);
-}
-
-.victory-title {
-    font-size: 2rem;
-    margin-bottom: 10px;
-    color: #d4af37;
-}
-
-.victory-team {
-    font-size: 2rem;
-    margin-bottom: 20px;
-}
-
-.close-victory {
-    background: #3498db;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-}
-
-/* ===== STATUS ===== */
-.truco-status {
-    font-size: 0.9rem;
-    opacity: 0.8;
-    min-height: 10px;
-    margin-top: 10px;
-    text-align: center;
-}
-
-/* ===== PWA BANNER ===== */
-.pwa-banner {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-
-    background-color: #252731;
-    padding: 20px 24px;
-    border-radius: 20px;
+.modal-overlay.active {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    font-size: 14px;
-    line-height: 1.4;
-    color: #e1e3eb;
-    box-shadow: 0px 4px 16px rgba(9, 10, 15, 0.3),
-        0px 8px 24px rgba(9, 10, 15, 0.25),
-        inset 0px 1px 1px #323543;
-    animation: slideUp 0.4s ease-out;
+}
 
-    @media (max-width: 600px) {
-        width: 90%;
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .list {
-        display: flex;
-        gap: 12px;
-    }
-
-    button {
-        appearance: none;
-        border: none;
-        color: inherit;
-        outline: none;
-        font: inherit;
-        font-size: 14px;
-        font-weight: 500;
-        background: #2e303d;
-        box-shadow: inset 0 0 0 1px #3c3e4d;
-        line-height: 24px;
-        padding: 8px 16px;
-        border-radius: 15px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-
-        &:hover {
-            background-color: #323543;
-        }
-
-        &.muted {
-            background: none;
-            box-shadow: inset 0 0 0 1px #353744;
-
-            &:hover {
-                background-color: #292b36;
-            }
-        }
-    }
+.edit-modal {
+    background-color: var(--modal-bg);
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
 }
 
 @keyframes slideUp {
     from {
-        transform: translate(-50%, 50px);
         opacity: 0;
+        transform: translateY(30px);
     }
 
     to {
-        transform: translate(-50%, 0);
         opacity: 1;
+        transform: translateY(0);
     }
 }
 
-@media (max-width: 600px) {
-    .pwa-banner {
-        width: 90%;
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.close-modal {
+    font-size: 1.4rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    background: none;
+    border: none;
+}
+
+.close-modal:hover {
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--icon-bg);
+    border-radius: 10px;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--text-primary);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-cancel {
+    background-color: var(--icon-bg);
+    color: var(--text-secondary);
+}
+
+.btn-cancel:hover {
+    background-color: var(--text-secondary);
+    color: var(--card-bg);
+}
+
+.btn-save {
+    background-color: var(--black-btn);
+    color: white;
+}
+
+.btn-save:hover {
+    filter: brightness(0.9);
+    transform: translateY(-1px);
+}
+
+/* -------------------------------
+       📱 RESPONSIVIDADE
+    --------------------------------*/
+@media (max-width: 430px) {
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    .team-card,
+    .setting-item {
+        padding: 14px;
+    }
+
+    .edit-modal {
+        padding: 20px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
+/* -------------------------------
+       🎪 BANNER PWA
+    --------------------------------*/
+.pwa-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    padding: 16px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    border-top: 1px solid var(--icon-bg);
+    z-index: 999;
+    display: none;
+}
+
+.pwa-banner .content {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.pwa-content {
+    flex: 1;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.list {
+    display: flex;
+    gap: 12px;
+}
+
+.muted,
+.pwa-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.muted {
+    background: var(--icon-bg);
+    color: var(--text-secondary);
+}
+
+.pwa-btn {
+    background: var(--black-btn);
+    color: white;
+}
+
+@media (max-width: 480px) {
+    .pwa-banner .content {
         flex-direction: column;
         text-align: center;
+    }
+
+    .list {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .muted,
+    .pwa-btn {
+        flex: 1;
     }
 }

@@ -1,211 +1,134 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>TruuucoScore</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="card.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcador de Truco</title>
+
+    <!-- Meta Tags e Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
-    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="TS" />
-    <script src="script.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
-    <style>
-        /* =========================
-   CONFIGURAÇÕES DROPDOWN
-========================= */
-        .config-container {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            z-index: 100;
-        }
+    <meta name="apple-mobile-web-app-title" content="TS">
 
-        #configBtn {
-            background: #3b2f2f;
-            color: #f1c40f;
-            font-size: 22px;
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            cursor: pointer;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s;
-        }
+    <!-- Ícones -->
+    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg">
+    <link rel="shortcut icon" href="/favicon/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
 
-        #configBtn:hover {
-            transform: rotate(25deg);
-        }
-
-        .config-menu {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 55px;
-            background: #2f2424;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .config-menu button {
-            background: #f1c40f;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .config-menu button:hover {
-            background: #d4ac0d;
-        }
-
-        /* =========================
-   LAYOUTS
-========================= */
-
-        /* Estado padrão (lado a lado) */
-        .teams-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            transition: all 0.4s ease;
-        }
-
-        /* Quando ativar o layout invertido */
-        .inverted-layout .teams-container {
-            flex-direction: column-reverse;
-            align-items: center;
-        }
-
-        /* Time 2 girado (mesa invertida) */
-        .rotated-team {
-            transform: rotate(180deg);
-            transition: transform 0.4s ease;
-        }
-
-        /* Truco centralizado entre os times */
-        .inverted-layout #trucoActions {
-            order: -1;
-            margin: 15px 0;
-        }
-
-        /* Animação suave */
-        .container,
-        .team {
-            transition: all 0.4s ease;
-        }
-    </style>
+    <!-- Estilos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <!-- Banner de Truco -->
-    <div id="trucoBanner" style="display:none;">
-        <span id="trucoBannerText"></span>
-    </div>
-
-    <!-- Botão de Configurações -->
-    <div class="config-container">
-        <button id="configBtn">⚙️</button>
-        <div id="configMenu" class="config-menu">
-            <button id="rotateTeamsBtn">🔁 Girar Times</button>
-        </div>
-    </div>
-
-    <div class="container">
+    <div class="screen-container">
+        <!-- Cabeçalho -->
         <header>
-            <h1>TRUUUCO! <span class="score-span">SCORE</span></h1>
-            <br>
-            <p class="subtitle">Marcador de pontos</p>
+            <h1>Vamos jogar</h1>
+            <p>Configure do seu jeito e comece!</p>
+            <img src="/image/LogoTruuucoScore.png" alt="Carta de Truco" class="header-card">
         </header>
 
-        <div class="teams-container">
-            <!-- Time 1 -->
-            <div class="team" id="team1">
-                <div class="team-header">
-                    <input type="text" class="team-name" value="Time 1" maxlength="15">
-                    <span class="edit-icon">✏️</span>
+        <!-- Conteúdo Principal -->
+        <main>
+            <!-- Seção de Configurações -->
+            <section class="settings-section">
+                <div class="section-header">
+                    <h2>Definições do Jogo</h2>
+                    <i class="bi bi-pencil-fill" id="edit-settings"></i>
                 </div>
 
-                <label class="card diamond team-card">
-                    <div class="back"></div>
-                    <div class="front">
-                        <div class="num-box top suit score1">0</div>
-                        <div class="num-box bottom suit score1">0</div>
-                        <div class="suit main score1">0</div>
+                <div class="settings-card-list">
+                    <div class="setting-item" data-setting="Tipo de Truco">
+                        <div class="item-icon-bg">
+                            <i class="bi bi-calendar-event-fill"></i>
+                        </div>
+                        <div class="item-text">
+                            <h3>Tipo de Truco</h3>
+                            <p>Paulista</p>
+                        </div>
                     </div>
-                </label>
-                <div class="truco-status" id="trucoStatus1"></div>
-                <div class="victories" id="victories1">
-                    <span class="victory-card diamond">♦</span>
-                    <span class="victory-card spade">♠</span>
-                    <span class="victory-card heart">♥</span>
-                    <span class="victory-card club">♣</span>
-                </div>
-                <br>
-                <div class="controls">
-                    <button class="decrease-btn">-1</button>
-                    <button class="increase-btn">+1</button>
-                </div>
-            </div>
 
-            <!-- Time 2 -->
-            <div class="team" id="team2">
-                <div class="team-header">
-                    <input type="text" class="team-name" value="Time 2" maxlength="15">
-                    <span class="edit-icon">✏️</span>
-                </div>
-
-                <label class="card diamond team-card">
-                    <div class="back"></div>
-                    <div class="front">
-                        <div class="num-box top suit score2">0</div>
-                        <div class="num-box bottom suit score2">0</div>
-                        <div class="suit main score2">0</div>
+                    <div class="setting-item" data-setting="Pontuação Máxima">
+                        <div class="item-icon-bg">
+                            <i class="bi bi-clipboard-data-fill"></i>
+                        </div>
+                        <div class="item-text">
+                            <h3>Pontuação Máxima</h3>
+                            <p>Atual: 12</p>
+                        </div>
                     </div>
-                </label>
-                <div class="truco-status" id="trucoStatus2"></div>
-                <div class="victories" id="victories2">
-                    <span class="victory-card diamond">♦</span>
-                    <span class="victory-card spade">♠</span>
-                    <span class="victory-card heart">♥</span>
-                    <span class="victory-card club">♣</span>
+
+                    <div class="setting-item" data-setting="Número de Partidas">
+                        <div class="item-icon-bg">
+                            <i class="bi bi-trophy-fill"></i>
+                        </div>
+                        <div class="item-text">
+                            <h3>Número de Partidas</h3>
+                            <p>Melhor de 3</p>
+                        </div>
+                    </div>
                 </div>
-                <br>
-                <div class="controls">
-                    <button class="decrease-btn">-1</button>
-                    <button class="increase-btn">+1</button>
+            </section>
+
+            <!-- Seção de Equipes -->
+            <section class="teams-section">
+                <div class="section-header">
+                    <h2>Equipes</h2>
                 </div>
+
+                <div class="team-cards">
+                    <div class="team-card">
+                        <div class="team-name">
+                            <i class="bi bi-flag-fill"></i>
+                            <span id="team-name-nos">Nós</span>
+                        </div>
+                        <i class="bi bi-pencil-fill edit-team" data-team="nos"></i>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="team-name">
+                            <i class="bi bi-flag-fill"></i>
+                            <span id="team-name-eles">Eles</span>
+                        </div>
+                        <i class="bi bi-pencil-fill edit-team" data-team="eles"></i>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Botão de Iniciar -->
+            <div class="start-button-container">
+                <button class="start-button" id="start-game">Iniciar partida</button>
             </div>
-        </div>
+        </main>
+    </div>
 
-        <div id="trucoActions" style="display: flex; gap: 20px; justify-content: center;">
-            <button class="truco-btn" id="mainTrucoBtn" style="width: 120px;">Truco</button>
-            <button class="truco-btn" id="runBtn"
-                style="width: 120px; background: #e74c3c; color: #fff; display: none; box-shadow: inset 0 -4px 0 #7c2e25;">Correr</button>
-            <button class="truco-btn" id="resetTrucoBtn"
-                style="width: 120px; background: #f1c40f; color: #222; display: none;">Voltar ao 1</button>
-        </div>
-
-        <div class="reset-container">
-            <button class="reset-btn" id="resetPoints">Zerar Pontos</button>
-            <button class="reset-btn" id="resetVictories">Zerar Vitórias</button>
+    <!-- Modal de Edição de Nomes -->
+    <div class="modal-overlay" id="editModal">
+        <div class="edit-modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Editar Nome da Equipe</h2>
+                <button class="close-modal" id="closeModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <form id="teamNameForm">
+                <div class="form-group">
+                    <label for="teamNameInput">Nome da Equipe</label>
+                    <input type="text" id="teamNameInput" class="form-input" placeholder="Digite o nome da equipe"
+                        maxlength="20" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" id="cancelEdit">Cancelar</button>
+                    <button type="submit" class="btn btn-save">Salvar</button>
+                </div>
+            </form>
         </div>
     </div>
 
+    <!-- Banner PWA -->
     <div id="pwaBanner" class="pwa-banner" style="display: none;">
         <div class="content">
             <div class="pwa-content">
@@ -218,16 +141,169 @@
         </div>
     </div>
 
-    <!-- Modal de Vitória -->
-    <div class="victory-modal" id="victoryModal">
-        <div class="victory-content">
-            <h2 class="victory-title">VITÓRIA!</h2>
-            <div class="victory-team" id="victoryTeamName">Time Vencedor</div>
-            <button class="close-victory" id="closeVictory">Fechar</button>
-        </div>
-    </div>
-
+    <!-- Scripts -->
     <script>
+        // Sistema de Edição de Nomes
+        class TeamNameEditor {
+            constructor() {
+                this.currentTeam = null;
+                this.modal = document.getElementById('editModal');
+                this.form = document.getElementById('teamNameForm');
+                this.teamNameInput = document.getElementById('teamNameInput');
+                this.modalTitle = document.getElementById('modalTitle');
+
+                this.initEventListeners();
+            }
+
+            initEventListeners() {
+                // Botões de edição das equipes
+                document.querySelectorAll('.edit-team').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.openEditModal(button.dataset.team);
+                    });
+                });
+
+                // Fechar modal
+                document.getElementById('closeModal').addEventListener('click', () => this.closeModal());
+                document.getElementById('cancelEdit').addEventListener('click', () => this.closeModal());
+
+                // Submeter formulário
+                this.form.addEventListener('submit', (e) => this.saveTeamName(e));
+
+                // Fechar modal clicando fora
+                this.modal.addEventListener('click', (e) => {
+                    if (e.target === this.modal) {
+                        this.closeModal();
+                    }
+                });
+
+                // Fechar com ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.modal.classList.contains('active')) {
+                        this.closeModal();
+                    }
+                });
+            }
+
+            openEditModal(teamId) {
+                this.currentTeam = teamId;
+                const teamElement = document.getElementById(`team-name-${teamId}`);
+                const currentName = teamElement.textContent;
+
+                this.teamNameInput.value = currentName;
+                this.modalTitle.textContent = `Editar ${this.getTeamDisplayName(teamId)}`;
+                this.modal.classList.add('active');
+
+                // Focar no input
+                setTimeout(() => {
+                    this.teamNameInput.focus();
+                    this.teamNameInput.select();
+                }, 300);
+            }
+
+            closeModal() {
+                this.modal.classList.remove('active');
+                this.currentTeam = null;
+                this.form.reset();
+            }
+
+            saveTeamName(e) {
+                e.preventDefault();
+
+                const newName = this.teamNameInput.value.trim();
+
+                if (!newName) {
+                    this.showError('Por favor, digite um nome para a equipe.');
+                    return;
+                }
+
+                if (newName.length > 20) {
+                    this.showError('O nome deve ter no máximo 20 caracteres.');
+                    return;
+                }
+
+                const teamElement = document.getElementById(`team-name-${this.currentTeam}`);
+                teamElement.textContent = newName;
+
+                // Salvar no localStorage para sincronizar entre páginas
+                this.saveToLocalStorage(this.currentTeam, newName);
+
+                this.closeModal();
+                this.showSuccess('Nome salvo com sucesso!');
+            }
+
+            getTeamDisplayName(teamId) {
+                const names = {
+                    'nos': 'Nossa Equipe',
+                    'eles': 'Equipe Adversária'
+                };
+                return names[teamId] || 'Equipe';
+            }
+
+            saveToLocalStorage(teamId, name) {
+                const teams = JSON.parse(localStorage.getItem('trucoTeams') || '{}');
+                teams[teamId] = name;
+                localStorage.setItem('trucoTeams', JSON.stringify(teams));
+            }
+
+            loadFromLocalStorage() {
+                const teams = JSON.parse(localStorage.getItem('trucoTeams') || '{}');
+
+                if (teams.nos) {
+                    document.getElementById('team-name-nos').textContent = teams.nos;
+                }
+                if (teams.eles) {
+                    document.getElementById('team-name-eles').textContent = teams.eles;
+                }
+            }
+
+            showError(message) {
+                // Implementação simples de alerta - pode ser melhorada com um toast
+                alert(`❌ ${message}`);
+            }
+
+            showSuccess(message) {
+                // Implementação simples de sucesso - pode ser melhorada com um toast
+                console.log(`✅ ${message}`);
+            }
+        }
+
+        // Inicialização quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sistema de edição de nomes
+            const teamEditor = new TeamNameEditor();
+            teamEditor.loadFromLocalStorage();
+
+            // Botão Iniciar Partida
+            const startButton = document.getElementById('start-game');
+            startButton.addEventListener('click', () => {
+                const originalText = startButton.textContent;
+                startButton.textContent = "Carregando...";
+                startButton.disabled = true;
+                startButton.style.opacity = 0.7;
+
+                // Redirecionar para o marcador após uma breve animação
+                setTimeout(() => {
+                    window.location.href = 'marcador.html';
+                }, 800);
+            });
+
+            // Botão de editar configurações
+            document.getElementById('edit-settings').addEventListener('click', () => {
+                alert("Abrindo menu para editar definições do jogo...");
+            });
+
+            // Itens de configuração
+            document.querySelectorAll('.setting-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const name = item.dataset.setting;
+                    alert(`Abrindo opções para: ${name}`);
+                });
+            });
+        });
+
+        // Service Worker e PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
@@ -235,50 +311,41 @@
                     .catch(err => console.log('❌ Erro ao registrar Service Worker:', err));
             });
         }
-    </script>
 
-    <script>
-        const configBtn = document.getElementById('configBtn');
-        const configMenu = document.getElementById('configMenu');
-        const rotateBtn = document.getElementById('rotateTeamsBtn');
-        const invertBtn = document.getElementById('invertLayoutBtn');
-        const container = document.querySelector('.container');
-        const team1 = document.getElementById('team1');
-        const team2 = document.getElementById('team2');
-        const teamsContainer = document.querySelector('.teams-container');
+        // Instalação do PWA
+        let deferredPrompt;
+        const pwaBanner = document.getElementById("pwaBanner");
+        const installBtn = document.getElementById("installBtn");
+        const recusarBtn = document.querySelector(".muted");
 
-        let rotated = false;
-        let inverted = false;
-
-        // Mostrar / esconder menu
-        configBtn.addEventListener('click', () => {
-            configMenu.style.display = configMenu.style.display === 'flex' ? 'none' : 'flex';
+        window.addEventListener("beforeinstallprompt", (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            pwaBanner.style.display = "flex";
         });
 
-        // Fechar menu ao clicar fora
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.config-container')) {
-                configMenu.style.display = 'none';
-            }
+        installBtn.addEventListener("click", async () => {
+            if (!deferredPrompt) return;
+
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Usuário escolheu: ${outcome}`);
+
+            deferredPrompt = null;
+            pwaBanner.style.display = "none";
         });
 
-        // Opção 1 — Girar Times alternadamente
-        rotateBtn.addEventListener('click', () => {
-            if (!rotated) {
-                team2.classList.add('rotated-team');
-                rotated = 'team2';
-            } else if (rotated === 'team2') {
-                team2.classList.remove('rotated-team');
-                team1.classList.add('rotated-team');
-                rotated = 'team1';
-            } else {
-                team1.classList.remove('rotated-team');
-                rotated = false;
-            }
+        recusarBtn.addEventListener("click", () => {
+            pwaBanner.style.display = "none";
+            deferredPrompt = null;
+            console.log("Usuário recusou instalar o app.");
+        });
+
+        window.addEventListener("appinstalled", () => {
+            console.log("✅ PWA instalado!");
+            pwaBanner.style.display = "none";
         });
     </script>
-
-
 </body>
 
 </html>
