@@ -46,7 +46,6 @@ body {
 
 .screen-container {
     width: 100%;
-    max-width: 600px;
     padding: 24px;
     position: relative;
     animation: fadeIn 0.5s ease forwards;
@@ -222,8 +221,7 @@ section {
 }
 
 .team-name i {
-    margin-right: 8px;
-    color: #555;
+    color: #ffffff;
 }
 
 .edit-team {
@@ -251,7 +249,7 @@ section {
     font-size: 1.1rem;
     font-weight: 600;
     background: var(--black-btn);
-    color: #fff;
+    color: #000000;
     border: none;
     border-radius: 16px;
     cursor: pointer;
@@ -296,6 +294,7 @@ section {
     max-width: 400px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     animation: slideUp 0.3s ease;
+    color: #000000;
 }
 
 @keyframes slideUp {
@@ -391,7 +390,7 @@ section {
 
 .btn-save {
     background-color: var(--black-btn);
-    color: white;
+    color: rgb(0, 0, 0);
 }
 
 .btn-save:hover {
