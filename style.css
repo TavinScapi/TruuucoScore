@@ -477,7 +477,7 @@ section {
 
 .pwa-btn {
     background: var(--black-btn);
-    color: white;
+    color: #000000;
 }
 
 @media (max-width: 480px) {
