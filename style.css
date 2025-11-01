@@ -1,30 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
+
 :root {
-    --bg-color: #f8f8f8;
-    --card-bg: #ffffff;
-    --text-primary: #bababd;
-    --text-secondary: #8a8a8e;
-    --icon-bg: #f0f0f0;
-    --black-btn: #c5c5c5;
-    --shadow: 0 4px 14px rgba(206, 175, 175, 0.08);
-    --transition: 0.25s ease;
-    --overlay-bg: rgba(0, 0, 0, 0.5);
-    --modal-bg: #ffffff;
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-primary: #f5f5f5;
+    --text-secondary: #b0b0b0;
+    --icon-bg: #2a2a2a;
+    --black-btn: #fff;
+    --shadow: 0 4px 14px rgba(255, 255, 255, 0.05);
+    --modal-bg: #2d2d2d;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-color: #121212;
-        --card-bg: #1e1e1e;
-        --text-primary: #f5f5f5;
-        --text-secondary: #b0b0b0;
-        --icon-bg: #2a2a2a;
-        --black-btn: #fff;
-        --shadow: 0 4px 14px rgba(255, 255, 255, 0.05);
-        --modal-bg: #2d2d2d;
-    }
-}
 
 /* -------------------------------
        🧱 BASE GLOBAL
