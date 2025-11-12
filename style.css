@@ -29,6 +29,7 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
+    overflow: hidden;
 }
 
 .screen-container {
@@ -72,9 +73,8 @@ header p {
 
 .header-card {
     position: absolute;
-    top: -20px;
-    right: 10px;
-    width: 70px;
+    top: -33px;
+    right: -36px;
     transform: rotate(15deg);
     opacity: 0.9;
     animation: floatCard 4s ease-in-out infinite;
