@@ -24,16 +24,13 @@
 
 <body>
     <div class="screen-container">
-        <!-- Cabeçalho -->
         <header>
             <h1>Vamos jogar</h1>
             <p>Configure do seu jeito e comece!</p>
-            <img src="/image/LogoTruuucoScore.png" alt="Carta de Truco" class="header-card">
+            <img src="/image/LogoTruuucoScore.png" alt="Carta de Truco" class="header-card" style="width: 150px; height: auto;">
         </header>
 
-        <!-- Conteúdo Principal -->
         <main>
-            <!-- Seção de Configurações -->
             <section class="settings-section">
                 <div class="section-header">
                     <h2>Definições do Jogo</h2>
@@ -73,7 +70,6 @@
                 </div>
             </section>
 
-            <!-- Seção de Equipes -->
             <section class="teams-section">
                 <div class="section-header">
                     <h2>Equipes</h2>
@@ -84,6 +80,7 @@
                         <div class="team-name">
                             <div class="item-icon-bg">
                                 <i class="bi bi-flag-fill"></i>
+                                <span class="team-suit" id="team-suit-nos"></span>
                             </div>
                             <span id="team-name-nos">Nós</span>
                         </div>
@@ -94,21 +91,21 @@
                         <div class="team-name">
                             <div class="item-icon-bg">
                                 <i class="bi bi-flag-fill"></i>
-                            </div> <span id="team-name-eles">Eles</span>
+                                <span class="team-suit" id="team-suit-eles"></span>
+                            </div>
+                            <span id="team-name-eles">Eles</span>
                         </div>
                         <i class="bi bi-pencil-fill edit-team" data-team="eles"></i>
                     </div>
                 </div>
             </section>
 
-            <!-- Botão de Iniciar -->
             <div class="start-button-container">
                 <button class="start-button" id="start-game">Iniciar partida</button>
             </div>
         </main>
     </div>
 
-    <!-- Modal de Edição de Nomes -->
     <div class="modal-overlay" id="editModal">
         <div class="edit-modal">
             <div class="modal-header">
@@ -123,6 +120,18 @@
                     <input type="text" id="teamNameInput" class="form-input" placeholder="Digite o nome da equipe"
                         maxlength="20" required>
                 </div>
+
+                <div class="form-group">
+                    <label>Escolha o Naipe</label>
+                    <div class="suit-options" id="suitOptions">
+                        <span class="suit-option" data-suit="♥">♥</span>
+                        <span class="suit-option" data-suit="♦">♦</span>
+                        <span class="suit-option" data-suit="♣">♣</span>
+                        <span class="suit-option" data-suit="♠">♠</span>
+                        <span class="suit-option" data-suit="🃏">🃏</span>
+                    </div>
+                </div>
+
                 <div class="modal-actions">
                     <button type="button" class="btn btn-cancel" id="cancelEdit">Cancelar</button>
                     <button type="submit" class="btn btn-save">Salvar</button>
@@ -131,7 +140,6 @@
         </div>
     </div>
 
-    <!-- Banner PWA -->
     <div id="pwaBanner" class="pwa-banner">
         <div class="content">
             <div class="pwa-content">
@@ -144,210 +152,156 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script>
-        // Sistema de Edição de Nomes
-        class TeamNameEditor {
-            constructor() {
-                this.currentTeam = null;
-                this.modal = document.getElementById('editModal');
-                this.form = document.getElementById('teamNameForm');
-                this.teamNameInput = document.getElementById('teamNameInput');
-                this.modalTitle = document.getElementById('modalTitle');
+        (function () {
+            const overlay = document.getElementById('editModal');
+            const editButtons = document.querySelectorAll('.edit-team');
+            const teamNameInput = document.getElementById('teamNameInput');
+            const modalTitle = document.getElementById('modalTitle');
+            const suitOptions = document.getElementById('suitOptions');
+            const form = document.getElementById('teamNameForm');
+            const closeBtn = document.getElementById('closeModal');
+            const cancelBtn = document.getElementById('cancelEdit');
+            const startBtn = document.getElementById('start-game');
+            let currentTeam = null;
 
-                this.initEventListeners();
-            }
-
-            initEventListeners() {
-                // Botões de edição das equipes
-                document.querySelectorAll('.edit-team').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        this.openEditModal(button.dataset.team);
-                    });
-                });
-
-                // Fechar modal
-                document.getElementById('closeModal').addEventListener('click', () => this.closeModal());
-                document.getElementById('cancelEdit').addEventListener('click', () => this.closeModal());
-
-                // Submeter formulário
-                this.form.addEventListener('submit', (e) => this.saveTeamName(e));
-
-                // Fechar modal clicando fora
-                this.modal.addEventListener('click', (e) => {
-                    if (e.target === this.modal) {
-                        this.closeModal();
-                    }
-                });
-
-                // Fechar com ESC
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && this.modal.classList.contains('active')) {
-                        this.closeModal();
-                    }
-                });
-            }
-
-            openEditModal(teamId) {
-                this.currentTeam = teamId;
-                const teamElement = document.getElementById(`team-name-${teamId}`);
-                const currentName = teamElement.textContent;
-
-                this.teamNameInput.value = currentName;
-                this.modalTitle.textContent = `Editar ${this.getTeamDisplayName(teamId)}`;
-                this.modal.classList.add('active');
-
-                // Focar no input
-                setTimeout(() => {
-                    this.teamNameInput.focus();
-                    this.teamNameInput.select();
-                }, 300);
-            }
-
-            closeModal() {
-                this.modal.classList.remove('active');
-                this.currentTeam = null;
-                this.form.reset();
-            }
-
-            saveTeamName(e) {
-                e.preventDefault();
-
-                const newName = this.teamNameInput.value.trim();
-
-                if (!newName) {
-                    this.showError('Por favor, digite um nome para a equipe.');
-                    return;
+            // Esconde spans de naipe vazios ao carregar
+            document.querySelectorAll('.team-cards .item-icon-bg').forEach(bg => {
+                const suitSpan = bg.querySelector('.team-suit');
+                if (suitSpan && !suitSpan.textContent.trim()) {
+                    suitSpan.style.display = 'none';
                 }
+            });
 
-                if (newName.length > 20) {
-                    this.showError('O nome deve ter no máximo 20 caracteres.');
-                    return;
-                }
-
-                const teamElement = document.getElementById(`team-name-${this.currentTeam}`);
-                teamElement.textContent = newName;
-
-                // Salvar no localStorage para sincronizar entre páginas
-                this.saveToLocalStorage(this.currentTeam, newName);
-
-                this.closeModal();
-                this.showSuccess('Nome salvo com sucesso!');
+            function mapSuitToClass(suit) {
+                if (suit === '♠') return 'spade';
+                if (suit === '♥') return 'heart';
+                if (suit === '♦') return 'diamond';
+                if (suit === '♣') return 'club';
+                if (suit === '🃏') return 'joker';
+                return 'diamond';
             }
 
-            getTeamDisplayName(teamId) {
-                const names = {
-                    'nos': 'Nossa Equipe',
-                    'eles': 'Equipe Adversária'
+            function persistTeams() {
+                const nosName = document.getElementById('team-name-nos').textContent.trim() || 'Nós';
+                const elesName = document.getElementById('team-name-eles').textContent.trim() || 'Eles';
+                const nosSuit = document.getElementById('team-suit-nos').textContent.trim() || '♦';
+                const elesSuit = document.getElementById('team-suit-eles').textContent.trim() || '♦';
+
+                const teams = {
+                    nos: { name: nosName, suit: nosSuit, suitClass: mapSuitToClass(nosSuit) },
+                    eles: { name: elesName, suit: elesSuit, suitClass: mapSuitToClass(elesSuit) }
                 };
-                return names[teamId] || 'Equipe';
-            }
-
-            saveToLocalStorage(teamId, name) {
-                const teams = JSON.parse(localStorage.getItem('trucoTeams') || '{}');
-                teams[teamId] = name;
                 localStorage.setItem('trucoTeams', JSON.stringify(teams));
             }
 
-            loadFromLocalStorage() {
-                const teams = JSON.parse(localStorage.getItem('trucoTeams') || '{}');
+            function openModalFor(team) {
+                currentTeam = team;
+                const nameSpan = document.getElementById(`team-name-${team}`);
+                const suitSpan = document.getElementById(`team-suit-${team}`);
+                const currentName = nameSpan ? nameSpan.textContent.trim() : '';
+                const currentSuit = suitSpan ? suitSpan.textContent.trim() : '';
 
-                if (teams.nos) {
-                    document.getElementById('team-name-nos').textContent = teams.nos;
+                teamNameInput.value = currentName;
+                modalTitle.textContent = `Editar Nome da Equipe — ${currentName || 'Equipe'}`;
+
+                suitOptions.querySelectorAll('.suit-option').forEach(opt => {
+                    opt.classList.toggle('selected', opt.dataset.suit === currentSuit);
+                });
+
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+                currentTeam = null;
+            }
+
+            function updateIcon(team, newSuit) {
+                const nameSpan = document.getElementById(`team-name-${team}`);
+                if (!nameSpan) return;
+                const iconBg = nameSpan.closest('.team-name').querySelector('.item-icon-bg');
+                const flagIcon = iconBg.querySelector('i');
+                const suitSpan = iconBg.querySelector('.team-suit');
+
+                if (newSuit) {
+                    if (suitSpan) {
+                        suitSpan.textContent = newSuit;
+                        suitSpan.style.display = 'inline';
+                    }
+                    if (flagIcon) flagIcon.style.display = 'none';
+                } else {
+                    if (suitSpan) {
+                        suitSpan.textContent = '';
+                        suitSpan.style.display = 'none';
+                    }
+                    if (flagIcon) flagIcon.style.display = '';
                 }
-                if (teams.eles) {
-                    document.getElementById('team-name-eles').textContent = teams.eles;
-                }
             }
 
-            showError(message) {
-                // Implementação simples de alerta - pode ser melhorada com um toast
-                alert(`❌ ${message}`);
-            }
-
-            showSuccess(message) {
-                // Implementação simples de sucesso - pode ser melhorada com um toast
-                console.log(`✅ ${message}`);
-            }
-        }
-
-        // Inicialização quando o DOM estiver carregado
-        document.addEventListener('DOMContentLoaded', () => {
-            // Sistema de edição de nomes
-            const teamEditor = new TeamNameEditor();
-            teamEditor.loadFromLocalStorage();
-
-            // Botão Iniciar Partida
-            const startButton = document.getElementById('start-game');
-            startButton.addEventListener('click', () => {
-                const originalText = startButton.textContent;
-                startButton.textContent = "Carregando...";
-                startButton.disabled = true;
-                startButton.style.opacity = 0.7;
-
-                // Redirecionar para o marcador após uma breve animação
-                setTimeout(() => {
-                    window.location.href = 'marcador.html';
-                }, 800);
-            });
-
-            // Botão de editar configurações
-            document.getElementById('edit-settings').addEventListener('click', () => {
-                alert("Abrindo menu para editar definições do jogo...");
-            });
-
-            // Itens de configuração
-            document.querySelectorAll('.setting-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const name = item.dataset.setting;
-                    alert(`Abrindo opções para: ${name}`);
+            editButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const team = btn.dataset.team;
+                    if (team) openModalFor(team);
                 });
             });
-        });
 
-        // Service Worker e PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(reg => console.log('✅ Service Worker registrado:', reg.scope))
-                    .catch(err => console.log('❌ Erro ao registrar Service Worker:', err));
+            suitOptions.addEventListener('click', (e) => {
+                const opt = e.target.closest('.suit-option');
+                if (!opt) return;
+                suitOptions.querySelectorAll('.suit-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
             });
-        }
 
-        // Instalação do PWA
-        let deferredPrompt;
-        const pwaBanner = document.getElementById("pwaBanner");
-        const installBtn = document.getElementById("installBtn");
-        const recusarBtn = document.querySelector(".muted");
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!currentTeam) return closeModal();
 
-        window.addEventListener("beforeinstallprompt", (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            pwaBanner.style.display = "flex";
-        });
+                const newName = teamNameInput.value.trim() || 'Equipe';
+                const selected = suitOptions.querySelector('.suit-option.selected');
+                const newSuit = selected ? selected.dataset.suit : '';
 
-        installBtn.addEventListener("click", async () => {
-            if (!deferredPrompt) return;
+                const nameSpan = document.getElementById(`team-name-${currentTeam}`);
+                const suitSpan = document.getElementById(`team-suit-${currentTeam}`);
 
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`Usuário escolheu: ${outcome}`);
+                if (nameSpan) nameSpan.textContent = newName;
+                if (suitSpan) suitSpan.textContent = newSuit;
 
-            deferredPrompt = null;
-            pwaBanner.style.display = "none";
-        });
+                // substitui/oculta ícone de bandeira pelo naipe escolhido
+                updateIcon(currentTeam, newSuit);
 
-        recusarBtn.addEventListener("click", () => {
-            pwaBanner.style.display = "none";
-            deferredPrompt = null;
-            console.log("Usuário recusou instalar o app.");
-        });
+                // persiste imediatamente ao salvar no modal
+                persistTeams();
 
-        window.addEventListener("appinstalled", () => {
-            console.log("✅ PWA instalado!");
-            pwaBanner.style.display = "none";
-        });
+                closeModal();
+            });
+
+            closeBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+
+            // Fecha clicando no overlay (fora do modal)
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeModal();
+            });
+
+            // Escape para fechar
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
+
+            // Ao clicar em Iniciar, persiste e navega para marcador.html
+            if (startBtn) {
+                startBtn.addEventListener('click', function () {
+                    persistTeams();
+                    // garante que o novo estado foi gravado antes da navegação
+                    setTimeout(() => {
+                        window.location.href = 'marcador.html';
+                    }, 50);
+                });
+            }
+        })();
     </script>
 </body>
 

@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
-
 :root {
     --bg-color: #121212;
     --card-bg: #1e1e1e;
@@ -10,6 +9,7 @@
     --black-btn: #fff;
     --shadow: 0 4px 14px rgba(255, 255, 255, 0.05);
     --modal-bg: #2d2d2d;
+    --overlay-bg: rgba(0, 0, 0, 0.6);
 }
 
 
@@ -281,7 +281,7 @@ section {
     max-width: 400px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     animation: slideUp 0.3s ease;
-    color: #000000;
+    color: var(--text-primary);
 }
 
 @keyframes slideUp {
@@ -420,7 +420,7 @@ section {
     left: 0;
     right: 0;
     background: var(--card-bg);
-    padding: 16px;
+    background-color: var(--overlay-bg);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
     border-top: 1px solid var(--icon-bg);
     display: none;
@@ -481,4 +481,50 @@ section {
     .pwa-btn {
         flex: 1;
     }
+}
+
+
+
+.suit-options {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.suit-option {
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.suit-option:hover {
+    transform: scale(1.2);
+    filter: brightness(1.3);
+}
+
+.suit-option.selected {
+    transform: scale(1.3);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    padding: 5px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.team-suit {
+    font-size: 30px;
+    margin-left: 0;
+}
+
+.team-icon-suit {
+    font-size: 1.6rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    color: inherit;
 }

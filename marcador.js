@@ -19,8 +19,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // Estado
     let scores = { team1: 0, team2: 0 };
     let victories = { team1: 0, team2: 0 };
-    let naipeIndex = { team1: 0, team2: 0 };
-    const naipes = ['diamond', 'spade', 'heart', 'club'];
+    // cada time terá um naipe atual (símbolo) e classe (diamond, spade, heart, club, joker)
+    let teamData = {
+        team1: { name: 'Time 1', suit: '♦', suitClass: 'diamond' },
+        team2: { name: 'Time 2', suit: '♦', suitClass: 'diamond' }
+    };
+    const naipes = ['diamond', 'spade', 'heart']; // melhor de 3 — 3 símbolos
     let trucoAtivo = false;
     let trucoIndex = 0;
     const trucoValues = [3, 6, 9, 12];
@@ -179,22 +183,59 @@ document.addEventListener('DOMContentLoaded', function () {
             resetarRodada();
         }, 500);
 
-        const teamName = document.querySelector(`#${team} .team-name`).value;
-        victoryTeamName.textContent = teamName;
-        victoryModal.classList.add('active');
+        // Atualiza nome do time a partir do input (se existir) ou do localStorage
+        const inputEl = document.querySelector(`#${team} .team-name`);
+        const teamName = inputEl ? inputEl.value : teamData[team].name;
+
+        // Incrementa vitórias (melhor de 3)
         victories[team]++;
         atualizarVitorias();
 
-        // Troca naipe da carta
+    // Define o naipe vencedor a partir do naipe atual do time (mantido internamente)
+    // Mas não exibimos o símbolo junto ao nome do time — mostramos apenas o nome.
+    // O naipe ainda é usado para atualização visual da carta.
+    // const winnerSuit = teamData[team].suit || (team === 'team1' ? '♦' : '♦');
+    victoryTeamName.textContent = teamName;
+        victoryModal.classList.add('active');
+
+        // Atualiza a carta visual do time para o próximo naipe (rotação simples)
         const card = document.querySelector(`#${team} .card`);
-        card.classList.remove(...naipes);
-        naipeIndex[team] = (naipeIndex[team] + 1) % naipes.length;
-        card.classList.add(naipes[naipeIndex[team]]);
+        if (card) {
+            // remove classes conhecidas
+            card.classList.remove('diamond', 'spade', 'heart');
+            // pega a classe atual e avança (se quiser manter rotação visual)
+            const currentClass = teamData[team].suitClass || 'diamond';
+            const idx = naipes.indexOf(currentClass);
+            const nextClass = naipes[(idx + 1) % naipes.length];
+            card.classList.add(nextClass);
+            // atualiza dado do time
+            teamData[team].suitClass = nextClass;
+            // mapa de classe para símbolo
+            const classToSymbol = { diamond: '♦', spade: '♠', heart: '♥' };
+            teamData[team].suit = classToSymbol[nextClass] || '♦';
+        }
+
+        // Persistir vitórias e naipe no localStorage
+        saveStateToLocalStorage();
+
+        // Se chegou a 2 vitórias => campeão do melhor de 3
+        if (victories[team] >= 2) {
+            // destacar modal
+            const titleEl = victoryModal.querySelector('.victory-title');
+            if (titleEl) titleEl.textContent = 'CAMPEÃO!';
+            // desabilitar controles até o usuário resetar manualmente
+            document.querySelectorAll('button, .increase-btn, .decrease-btn').forEach(b => b.disabled = true);
+        }
     }
 
     closeVictory.addEventListener('click', () => {
         victoryModal.classList.remove('active');
+        // restaura título padrão
+        const titleEl = victoryModal.querySelector('.victory-title');
+        if (titleEl) titleEl.textContent = 'VITÓRIA!';
+        // resetar apenas a rodada (pontuação), manter vitórias. Se houve campeão, manter estado até reset manual.
         resetarRodada();
+        saveStateToLocalStorage();
     });
     victoryModal.addEventListener('click', e => {
         if (e.target === victoryModal) {
@@ -210,12 +251,18 @@ document.addEventListener('DOMContentLoaded', function () {
         victories.team1 = 0;
         victories.team2 = 0;
         atualizarVitorias();
-        naipeIndex.team1 = 0;
-        naipeIndex.team2 = 0;
-        document.querySelector('#team1 .card').classList.remove('spade', 'heart', 'club');
-        document.querySelector('#team1 .card').classList.add('diamond');
-        document.querySelector('#team2 .card').classList.remove('spade', 'heart', 'club');
-        document.querySelector('#team2 .card').classList.add('diamond');
+        // resetar naipes para padrão
+        teamData.team1.suit = '♦';
+        teamData.team1.suitClass = 'diamond';
+        teamData.team2.suit = '♦';
+        teamData.team2.suitClass = 'diamond';
+        const c1 = document.querySelector('#team1 .card');
+        const c2 = document.querySelector('#team2 .card');
+        if (c1) { c1.classList.remove('spade', 'heart'); c1.classList.add('diamond'); }
+        if (c2) { c2.classList.remove('spade', 'heart'); c2.classList.add('diamond'); }
+
+        // persiste
+        saveStateToLocalStorage();
     });
 
     // Editar nome do time
@@ -228,6 +275,78 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Inicialização
+    // Carrega dados salvos (nomes e naipes) e estado de vitórias
+    function loadStateFromLocalStorage() {
+        try {
+            const teams = JSON.parse(localStorage.getItem('trucoTeams') || '{}');
+            if (teams.nos) {
+                teamData.team1.name = teams.nos.name || teamData.team1.name;
+                teamData.team1.suit = teams.nos.suit || teamData.team1.suit;
+                // definir classe a partir do símbolo
+                teamData.team1.suitClass = teams.nos.suitClass || (teamData.team1.suit === '♠' ? 'spade' : (teamData.team1.suit === '♥' ? 'heart' : 'diamond'));
+            }
+            if (teams.eles) {
+                teamData.team2.name = teams.eles.name || teamData.team2.name;
+                teamData.team2.suit = teams.eles.suit || teamData.team2.suit;
+                teamData.team2.suitClass = teams.eles.suitClass || (teamData.team2.suit === '♠' ? 'spade' : (teamData.team2.suit === '♥' ? 'heart' : 'diamond'));
+            }
+
+            // carregar vitórias se existirem
+            const savedVictories = JSON.parse(localStorage.getItem('trucoVictories') || '{}');
+            if (typeof savedVictories.team1 === 'number') victories.team1 = savedVictories.team1;
+            if (typeof savedVictories.team2 === 'number') victories.team2 = savedVictories.team2;
+        } catch (e) {
+            console.error('Erro ao carregar estado:', e);
+        }
+    }
+
+    function saveStateToLocalStorage() {
+        try {
+            const teams = {
+                nos: { name: teamData.team1.name, suit: teamData.team1.suit, suitClass: teamData.team1.suitClass },
+                eles: { name: teamData.team2.name, suit: teamData.team2.suit, suitClass: teamData.team2.suitClass }
+            };
+            localStorage.setItem('trucoTeams', JSON.stringify(teams));
+            const savedVictories = { team1: victories.team1, team2: victories.team2 };
+            localStorage.setItem('trucoVictories', JSON.stringify(savedVictories));
+        } catch (e) {
+            console.error('Erro ao salvar estado:', e);
+        }
+    }
+
+    function applyTeamDataToUI() {
+        // Nomes
+        const name1 = document.querySelector('#team1 .team-name');
+        const name2 = document.querySelector('#team2 .team-name');
+        if (name1) name1.value = teamData.team1.name;
+        if (name2) name2.value = teamData.team2.name;
+
+        // Cartas (classe de naipe)
+        const card1 = document.querySelector('#team1 .card');
+        const card2 = document.querySelector('#team2 .card');
+        if (card1) {
+            card1.classList.remove('diamond', 'spade', 'heart');
+            card1.classList.add(teamData.team1.suitClass || 'diamond');
+        }
+        if (card2) {
+            card2.classList.remove('diamond', 'spade', 'heart');
+            card2.classList.add(teamData.team2.suitClass || 'diamond');
+        }
+    }
+
+    // quando o usuário edita o nome no marcador, atualizamos localStorage
+    document.querySelectorAll('.team-name').forEach((input, idx) => {
+        input.addEventListener('change', () => {
+            const key = idx === 0 ? 'team1' : 'team2';
+            teamData[key].name = input.value || teamData[key].name;
+            // salvar mudanças
+            saveStateToLocalStorage();
+        });
+    });
+
+    // Inicialização com carregamento
+    loadStateFromLocalStorage();
+    applyTeamDataToUI();
     atualizarMarcadores();
     atualizarPlacar();
     atualizarVitorias();
