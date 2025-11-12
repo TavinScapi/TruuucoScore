@@ -29,7 +29,6 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    overflow: hidden;
 }
 
 .screen-container {
@@ -37,6 +36,8 @@ body {
     padding: 24px;
     position: relative;
     animation: fadeIn 0.5s ease forwards;
+    overflow: hidden;
+
 }
 
 @keyframes fadeIn {
@@ -504,14 +505,6 @@ section {
     filter: brightness(1.3);
 }
 
-.suit-option.selected {
-    transform: scale(1.3);
-    border: 2px solid #fff;
-    border-radius: 50%;
-    padding: 5px;
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
 .team-suit {
     font-size: 30px;
     margin-left: 0;
@@ -528,3 +521,24 @@ section {
     background: rgba(255, 255, 255, 0.03);
     color: inherit;
 }
+
+.suit-option {
+    cursor: pointer;
+    font-size: 32px;
+    transition: transform 0.2s ease, color 0.2s ease, filter 0.2s ease;
+    color: #aaa; /* cor padrão (neutra) */
+}
+
+/* Quando selecionado */
+.suit-option.selected[data-color="red"] {
+    color: red;
+}
+
+.suit-option.selected[data-color="black"] {
+    color: black;
+}
+
+.suit-option.selected[data-color="gold"] {
+    color: gold;
+}
+

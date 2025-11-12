@@ -27,14 +27,14 @@
         <header>
             <h1>Vamos jogar</h1>
             <p>Configure do seu jeito e comece!</p>
-            <img src="/image/LogoTruuucoScore.png" alt="Carta de Truco" class="header-card" style="width: 150px; height: auto;">
+            <img src="/image/LogoTruuucoScore.png" alt="Carta de Truco" class="header-card"
+                style="width: 150px; height: auto;">
         </header>
 
         <main>
             <section class="settings-section">
                 <div class="section-header">
                     <h2>Definições do Jogo</h2>
-                    <i class="bi bi-pencil-fill" id="edit-settings"></i>
                 </div>
 
                 <div class="settings-card-list">
@@ -124,13 +124,21 @@
                 <div class="form-group">
                     <label>Escolha o Naipe</label>
                     <div class="suit-options" id="suitOptions">
-                        <span class="suit-option" data-suit="♥">♥</span>
-                        <span class="suit-option" data-suit="♦">♦</span>
-                        <span class="suit-option" data-suit="♣">♣</span>
-                        <span class="suit-option" data-suit="♠">♠</span>
-                        <span class="suit-option" data-suit="🃏">🃏</span>
+                        <span class="suit-option" data-suit="♦" data-color="red">
+                            <i class="bi bi-suit-diamond-fill"></i>
+                        </span>
+                        <span class="suit-option" data-suit="♠" data-color="black">
+                            <i class="bi bi-suit-spade-fill"></i>
+                        </span>
+                        <span class="suit-option" data-suit="♥" data-color="red">
+                            <i class="bi bi-suit-heart-fill"></i>
+                        </span>
+                        <span class="suit-option" data-suit="♣" data-color="black">
+                            <i class="bi bi-suit-club-fill"></i>
+                        </span>
                     </div>
                 </div>
+
 
                 <div class="modal-actions">
                     <button type="button" class="btn btn-cancel" id="cancelEdit">Cancelar</button>
