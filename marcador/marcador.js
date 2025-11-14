@@ -6,27 +6,38 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!teamEl) return;
         const key = 'teamSkin_' + mapping[teamId];
         const raw = localStorage.getItem(key);
-        if (!raw) return;
-        try {
-            const skin = JSON.parse(raw);
-            // procura os elementos .front e .back dentro da carta do time
-            const card = teamEl.querySelector('.card');
-            if (!card) return;
-            const front = card.querySelector('.front');
-            const back = card.querySelector('.back');
-            if (front && skin.front) {
-                front.style.backgroundImage = `url("${skin.front}")`;
-                // garante sizing parecido com o atual
-                front.style.backgroundSize = '120% 120%';
-                front.style.backgroundPosition = 'center';
+        
+        // Padrão se não tiver nada salvo
+        let skinData = { 
+            front: '/image/padrao/frente.png', 
+            back: '/image/padrao/verso.png' 
+        };
+        
+        if (raw) {
+            try {
+                skinData = JSON.parse(raw);
+            } catch (err) {
+                console.warn('erro ao parsear skin:', err);
             }
-            if (back && skin.back) {
-                back.style.backgroundImage = `url("${skin.back}")`;
-                back.style.backgroundSize = '120% 121%';
-                back.style.backgroundPosition = 'center';
-            }
-        } catch (err) {
-            console.warn('erro ao aplicar skin:', err);
+        }
+        
+        // Aplica a skin à carta do time
+        const card = teamEl.querySelector('.card');
+        if (!card) return;
+        const front = card.querySelector('.front');
+        const back = card.querySelector('.back');
+        
+        if (front) {
+            front.style.backgroundImage = `url("${skinData.front}")`;
+            front.style.backgroundSize = '120% 120%';
+            front.style.backgroundPosition = 'center';
+            front.style.backgroundRepeat = 'no-repeat';
+        }
+        if (back) {
+            back.style.backgroundImage = `url("${skinData.back}")`;
+            back.style.backgroundSize = '120% 121%';
+            back.style.backgroundPosition = 'center';
+            back.style.backgroundRepeat = 'no-repeat';
         }
     });
 });

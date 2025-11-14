@@ -3,12 +3,12 @@
 }
 
 :root {
-    --darkBg: #ff0000;
-    --lightBg: #ffffff;
-    --darkRed: #e22929;
-    --lightRed: #ff0000;
-    --darkBlack: #000;
-    --lightBlack: #777;
+    --darkBg: #d50ef0;
+    --lightBg: #8b1e1e;
+    --darkRed: #000000;
+    --lightRed: #777777;
+    --darkBlack: #000000;
+    --lightBlack: #777777;
 }
 
 body {
@@ -44,11 +44,11 @@ body {
 }
 
 .back {
-    border: 3px solid #4A3D2D;
+    border: 3px solid #251f18;
     /* borda vermelha do verso */
     border-radius: 12px;
     /* cantos arredondados */
-    background-image: url('image/back-card.png');
+    background-image: url('/image/padrao/verso.png');
     /* imagem do verso */
     background-size: 120% 121%;
     /* garante que a imagem ocupe toda a área */
@@ -62,7 +62,7 @@ body {
 .front {
     border: 3px solid #4A3D2D;
     border-radius: 12px;
-    background-image: url('image/front-card.png');
+    background-image: url('/image/padrao/frente.png');
     /* imagem da frente da carta */
     background-size: 120% 120%;
     /* preenche perfeitamente o espaço */
