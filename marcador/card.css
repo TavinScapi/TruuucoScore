@@ -3,10 +3,8 @@
 }
 
 :root {
-    --darkBg: #d50ef0;
-    --lightBg: #8b1e1e;
-    --darkRed: #000000;
-    --lightRed: #777777;
+    --darkRed: #e22929;
+    --lightRed: #ff4d4d;
     --darkBlack: #000000;
     --lightBlack: #777777;
 }

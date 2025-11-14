@@ -182,12 +182,33 @@
             const skinOptions = document.querySelectorAll('#skinOptions .skin-option');
             const form = document.getElementById('teamNameForm');
 
+            // cria preview visual nas opções de skin a partir dos atributos data-front
+            skinOptions.forEach(opt => {
+                // limpar texto existente e criar estrutura
+                const labelText = opt.textContent.trim();
+                opt.textContent = '';
+                const preview = document.createElement('div');
+                preview.className = 'skin-preview';
+                if (opt.dataset.front) preview.style.backgroundImage = `url("${opt.dataset.front}")`;
+                opt.appendChild(preview);
+
+                const label = document.createElement('div');
+                label.className = 'skin-label';
+                label.textContent = labelText;
+                opt.appendChild(label);
+
+                // atribuir tabindex para acessibilidade/teclado
+                opt.setAttribute('tabindex', '0');
+
+                // marca default se data-default
+                if (opt.dataset.default === 'true') opt.classList.add('active');
+            });
+
             // Quando abrir o modal, guardamos qual time está sendo editado
             editButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const team = btn.dataset.team; // "nos" ou "eles"
                     editModal.dataset.currentTeam = team;
-
                     // marca skin atual, se houver
                     const raw = localStorage.getItem('teamSkin_' + team);
                     let activeSet = false;
@@ -215,11 +236,17 @@
                 });
             });
 
-            // selecionar skin visualmente
+            // selecionar skin visualmente (também suporta Enter/Space)
             skinOptions.forEach(opt => {
                 opt.addEventListener('click', () => {
                     skinOptions.forEach(o => o.classList.remove('active'));
                     opt.classList.add('active');
+                });
+                opt.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        opt.click();
+                    }
                 });
             });
 

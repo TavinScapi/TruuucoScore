@@ -10,12 +10,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Padrão se não tiver nada salvo
         let skinData = { 
             front: '/image/padrao/frente.png', 
-            back: '/image/padrao/verso.png' 
+            back: '/image/padrao/verso.png',
+            isDarkRed: '#000000',   // valor padrão igual ao :root
+            isLightRed: '#777777'   // valor padrão igual ao :root
         };
         
         if (raw) {
             try {
-                skinData = JSON.parse(raw);
+                const parsed = JSON.parse(raw);
+                skinData.front = parsed.front;
+                skinData.back = parsed.back;
+                
+                // Se for alternativo, muda as cores
+                if (parsed.front.includes('alternativo')) {
+                    skinData.isDarkRed = '#e22929';
+                    skinData.isLightRed = '#ff0000';
+                }
             } catch (err) {
                 console.warn('erro ao parsear skin:', err);
             }
@@ -39,6 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
             back.style.backgroundPosition = 'center';
             back.style.backgroundRepeat = 'no-repeat';
         }
+        
+        // Substituir: aplicar as variáveis CSS no próprio .card (assim o seletores .heart/.diamond que usam var() herdarão)
+        card.style.setProperty('--darkRed', skinData.isDarkRed);
+        card.style.setProperty('--lightRed', skinData.isLightRed);
+        // atualizar cor inline dos elementos que usam color diretamente (se houver)
+        card.querySelectorAll('.heart, .diamond').forEach(el => el.style.color = skinData.isDarkRed);
     });
 });
 
