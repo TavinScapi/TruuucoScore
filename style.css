@@ -74,8 +74,8 @@ header p {
 
 .header-card {
     position: absolute;
-    top: -33px;
-    right: -36px;
+    top: -10px;
+    right: -13px;
     transform: rotate(15deg);
     opacity: 0.9;
     animation: floatCard 4s ease-in-out infinite;
