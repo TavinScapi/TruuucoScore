@@ -151,6 +151,14 @@
                         <button type="button" class="skin-option" data-front="/image/alternativo/frente.png" data-back="/image/alternativo/verso.png">
                             Alternativo
                         </button>
+
+                        <!-- botão upload: abre seletor de imagens (pode selecionar 1 ou 2 imagens) -->
+                        <button type="button" class="skin-option upload-option" id="uploadSkinBtn">
+                            <div class="skin-preview" style="display:flex;align-items:center;justify-content:center;">
+                                <i class="bi bi-image" style="font-size:1.6rem"></i>
+                            </div>
+                            <div class="skin-label">Upload da Galeria</div>
+                        </button>
                     </div>
                 </div>
 
@@ -179,43 +187,106 @@
         document.addEventListener('DOMContentLoaded', () => {
             const editButtons = document.querySelectorAll('.edit-team');
             const editModal = document.getElementById('editModal');
-            const skinOptions = document.querySelectorAll('#skinOptions .skin-option');
+            const skinContainer = document.getElementById('skinOptions');
             const form = document.getElementById('teamNameForm');
 
-            // cria preview visual nas opções de skin a partir dos atributos data-front
-            skinOptions.forEach(opt => {
-                // limpar texto existente e criar estrutura
-                const labelText = opt.textContent.trim();
+            // função utilitária para criar preview/label dentro de cada .skin-option (inclui opções estáticas e dinâmicas)
+            function enhanceSkinOption(opt) {
+                if (opt.dataset._enhanced) return;
+                const labelText = (opt.dataset.label) ? opt.dataset.label : opt.textContent.trim();
                 opt.textContent = '';
                 const preview = document.createElement('div');
                 preview.className = 'skin-preview';
                 if (opt.dataset.front) preview.style.backgroundImage = `url("${opt.dataset.front}")`;
                 opt.appendChild(preview);
-
                 const label = document.createElement('div');
                 label.className = 'skin-label';
-                label.textContent = labelText;
+                label.textContent = labelText || 'Skin';
                 opt.appendChild(label);
-
-                // atribuir tabindex para acessibilidade/teclado
                 opt.setAttribute('tabindex', '0');
-
-                // marca default se data-default
+                opt.dataset._enhanced = '1';
                 if (opt.dataset.default === 'true') opt.classList.add('active');
+            }
+
+            // enhance existentes
+            document.querySelectorAll('#skinOptions .skin-option').forEach(enhanceSkinOption);
+
+            // cria input de arquivo (multiplo) escondido
+            const uploadInput = document.createElement('input');
+            uploadInput.type = 'file';
+            uploadInput.accept = 'image/*';
+            uploadInput.multiple = true;
+            uploadInput.style.display = 'none';
+            document.body.appendChild(uploadInput);
+
+            // upload button action
+            const uploadBtn = document.getElementById('uploadSkinBtn');
+            uploadBtn.addEventListener('click', () => uploadInput.click());
+
+            uploadInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files).slice(0, 2); // aceita 1 ou 2 (frente, verso)
+                if (files.length === 0) return;
+                const readers = files.map(f => new Promise((res, rej) => {
+                    const r = new FileReader();
+                    r.onload = () => res(r.result);
+                    r.onerror = rej;
+                    r.readAsDataURL(f);
+                }));
+                Promise.all(readers).then(urls => {
+                    const frontData = urls[0];
+                    const backData = urls[1] || urls[0]; // se apenas 1 arquivo, usa para frente e verso
+                    // cria nova opção dinâmicamente
+                    const custom = document.createElement('button');
+                    custom.type = 'button';
+                    custom.className = 'skin-option';
+                    custom.dataset.front = frontData;
+                    custom.dataset.back = backData;
+                    custom.dataset.label = 'Personalizada';
+                    custom.dataset.isCustom = 'true'; // marca como custom
+                    // adiciona ao container antes do uploadBtn
+                    skinContainer.insertBefore(custom, uploadBtn);
+                    enhanceSkinOption(custom);
+                    // aplicar preview — atualizar preview explicitamente
+                    const prev = custom.querySelector('.skin-preview');
+                    if (prev) prev.style.backgroundImage = `url("${frontData}")`;
+                    // marcar como ativa
+                    document.querySelectorAll('#skinOptions .skin-option').forEach(o => o.classList.remove('active'));
+                    custom.classList.add('active');
+                    // limpa input para permitir reupload igual arquivo depois
+                    uploadInput.value = '';
+                }).catch(err => {
+                    console.warn('Erro ao ler imagens:', err);
+                });
             });
 
-            // Quando abrir o modal, guardamos qual time está sendo editado
+            // seleção visual das skins (inclui opções dinâmicas)
+            skinContainer.addEventListener('click', (e) => {
+                const opt = e.target.closest('.skin-option');
+                if (!opt) return;
+                document.querySelectorAll('#skinOptions .skin-option').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+            });
+            skinContainer.addEventListener('keydown', (e) => {
+                const opt = e.target.closest('.skin-option');
+                if (!opt) return;
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    opt.click();
+                }
+            });
+
+            // Quando abrir o modal, guardamos qual time está sendo editado e marca skin salva
             editButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const team = btn.dataset.team; // "nos" ou "eles"
+                    const team = btn.dataset.team;
                     editModal.dataset.currentTeam = team;
-                    // marca skin atual, se houver
                     const raw = localStorage.getItem('teamSkin_' + team);
                     let activeSet = false;
                     if (raw) {
                         try {
                             const skin = JSON.parse(raw);
-                            skinOptions.forEach(opt => {
+                            // tenta encontrar opção existente com mesmos dados
+                            document.querySelectorAll('#skinOptions .skin-option').forEach(opt => {
                                 if (opt.dataset.front === skin.front && opt.dataset.back === skin.back) {
                                     opt.classList.add('active');
                                     activeSet = true;
@@ -223,45 +294,31 @@
                                     opt.classList.remove('active');
                                 }
                             });
-                        } catch { /* ignore */ }
+                        } catch {}
                     }
                     if (!activeSet) {
-                        // marca padrão
                         const def = document.querySelector('#skinOptions .skin-option[data-default="true"]');
                         if (def) {
-                            skinOptions.forEach(opt => opt.classList.remove('active'));
+                            document.querySelectorAll('#skinOptions .skin-option').forEach(opt => opt.classList.remove('active'));
                             def.classList.add('active');
                         }
                     }
                 });
             });
 
-            // selecionar skin visualmente (também suporta Enter/Space)
-            skinOptions.forEach(opt => {
-                opt.addEventListener('click', () => {
-                    skinOptions.forEach(o => o.classList.remove('active'));
-                    opt.classList.add('active');
-                });
-                opt.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        opt.click();
-                    }
-                });
-            });
-
-            // Ao salvar o form, grava a skin escolhida no localStorage por time.
+            // Ao salvar o form, grava apenas a skin escolhida no localStorage por time.
             form.addEventListener('submit', (e) => {
-                // mantém comportamento padrão do form (ou converta se seu script.js já tratar)
                 const team = editModal.dataset.currentTeam;
                 if (team) {
                     const active = document.querySelector('#skinOptions .skin-option.active') || document.querySelector('#skinOptions .skin-option[data-default="true"]');
                     if (active) {
                         const skin = { front: active.dataset.front, back: active.dataset.back };
+                        // mantém marcação de custom se existir
+                        if (active.dataset.isCustom === 'true') skin.isCustom = true;
                         localStorage.setItem('teamSkin_' + team, JSON.stringify(skin));
                     }
                 }
-                // deixa qualquer outro código de salvamento continuar (evita preventDefault)
+                // deixa o restante do submit continuar (se tiver)
             });
         });
     </script>

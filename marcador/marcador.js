@@ -1,119 +1,157 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Mapeamento: team1 corresponde ao time "nos", team2 a "eles"
+
     const mapping = { team1: 'nos', team2: 'eles' };
+
     Object.keys(mapping).forEach(teamId => {
+
         const teamEl = document.getElementById(teamId);
         if (!teamEl) return;
+
         const key = 'teamSkin_' + mapping[teamId];
         const raw = localStorage.getItem(key);
-        
-        // Padrão se não tiver nada salvo
-        let skinData = { 
-            front: '/image/padrao/frente.png', 
+
+        // valores padrão
+        let skinData = {
+            front: '/image/padrao/frente.png',
             back: '/image/padrao/verso.png',
-            isDarkRed: '#000000',   // valor padrão igual ao :root
-            isLightRed: '#777777'   // valor padrão igual ao :root
+            isDarkBlack: '#000000',
+            isLightBlack: '#777777',
+            isDarkRed: '#e22929',
+            isLightRed: '#ff4d4d',
+            fontColor: null,
+            isCustom: false
         };
-        
+
         if (raw) {
             try {
                 const parsed = JSON.parse(raw);
-                skinData.front = parsed.front;
-                skinData.back = parsed.back;
-                
-                // Se for alternativo, muda as cores
-                if (parsed.front.includes('alternativo')) {
-                    skinData.isDarkRed = '#e22929';
-                    skinData.isLightRed = '#ff0000';
-                }
+                if (parsed.front) skinData.front = parsed.front;
+                if (parsed.back) skinData.back = parsed.back;
+                if (parsed.fontColor) skinData.fontColor = parsed.fontColor;
+                if (parsed.isCustom === true) skinData.isCustom = true;
             } catch (err) {
-                console.warn('erro ao parsear skin:', err);
+                console.warn('Erro ao parsear skin:', err);
             }
         }
-        
-        // Aplica a skin à carta do time
+
+        const isDefaultSkin = (skinData.front === '/image/padrao/frente.png' && skinData.back === '/image/padrao/verso.png');
+
         const card = teamEl.querySelector('.card');
         if (!card) return;
-        const front = card.querySelector('.front');
-        const back = card.querySelector('.back');
-        
-        if (front) {
-            front.style.backgroundImage = `url("${skinData.front}")`;
-            front.style.backgroundSize = '120% 120%';
-            front.style.backgroundPosition = 'center';
-            front.style.backgroundRepeat = 'no-repeat';
+        const frontEl = card.querySelector('.front');
+        const backEl = card.querySelector('.back');
+
+        // aplica imagens
+        if (frontEl) {
+            frontEl.style.backgroundImage = `url("${skinData.front}")`;
+            frontEl.style.backgroundSize = '120% 120%';
+            frontEl.style.backgroundPosition = 'center';
+            frontEl.style.backgroundRepeat = 'no-repeat';
         }
-        if (back) {
-            back.style.backgroundImage = `url("${skinData.back}")`;
-            back.style.backgroundSize = '120% 121%';
-            back.style.backgroundPosition = 'center';
-            back.style.backgroundRepeat = 'no-repeat';
+        if (backEl) {
+            backEl.style.backgroundImage = `url("${skinData.back}")`;
+            backEl.style.backgroundSize = '120% 121%';
+            backEl.style.backgroundPosition = 'center';
+            backEl.style.backgroundRepeat = 'no-repeat';
         }
-        
-        // Substituir: aplicar as variáveis CSS no próprio .card (assim o seletores .heart/.diamond que usam var() herdarão)
-        card.style.setProperty('--darkRed', skinData.isDarkRed);
-        card.style.setProperty('--lightRed', skinData.isLightRed);
-        // atualizar cor inline dos elementos que usam color diretamente (se houver)
-        card.querySelectorAll('.heart, .diamond').forEach(el => el.style.color = skinData.isDarkRed);
+
+        // cores globais (preto/cinza sempre aplicados)
+        card.style.setProperty('--darkBlack', skinData.isDarkBlack);
+        card.style.setProperty('--lightBlack', skinData.isLightBlack);
+
+        if (isDefaultSkin) {
+            // Skin padrão: força fontes pretas independentemente do naipe escolhido
+            card.style.setProperty('--darkRed', skinData.isDarkBlack);
+            card.style.setProperty('--lightRed', skinData.isLightBlack);
+
+            // override inline para garantir que todos os textos/naipe fiquem pretos
+            card.querySelectorAll('.heart, .diamond, .spade, .club, .num-box').forEach(el => {
+                el.style.color = skinData.isDarkBlack;
+            });
+
+        } else {
+            // Skin alternativa/customizada: cores dependem do naipe
+            card.style.setProperty('--darkRed', skinData.isDarkRed);
+            card.style.setProperty('--lightRed', skinData.isLightRed);
+
+            if (skinData.fontColor && skinData.isCustom) {
+                // custom + cor escolhida pelo usuário: aplica ao texto
+                card.style.setProperty('--fontColor', skinData.fontColor);
+                card.querySelectorAll('.num-box').forEach(el => el.style.color = skinData.fontColor);
+            } else {
+                // comportamento padrão por naipe
+                card.querySelectorAll('.heart, .diamond').forEach(el => el.style.color = skinData.isDarkRed);
+                card.querySelectorAll('.spade, .club').forEach(el => el.style.color = skinData.isDarkBlack);
+                card.querySelectorAll('.num-box').forEach(el => el.style.color = '');
+            }
+        }
+
     });
 });
 
+// =========================================================
+// ====      SISTEMA DE PONTOS / TRUCO / MODAL          ====
+// =========================================================
+
 document.addEventListener('DOMContentLoaded', function () {
-    // Elementos
+
     const score1Els = document.querySelectorAll('.score1');
     const score2Els = document.querySelectorAll('.score2');
     const victories1 = document.getElementById('victories1');
     const victories2 = document.getElementById('victories2');
+
     const victoryModal = document.getElementById('victoryModal');
     const victoryTeamName = document.getElementById('victoryTeamName');
     const closeVictory = document.getElementById('closeVictory');
+
     const resetPointsBtn = document.getElementById('resetPoints');
     const resetVictoriesBtn = document.getElementById('resetVictories');
+
     const mainTrucoBtn = document.getElementById('mainTrucoBtn');
     const runBtn = document.getElementById('runBtn');
     const resetTrucoBtn = document.getElementById('resetTrucoBtn');
+
     const trucoStatus1 = document.getElementById('trucoStatus1');
     const trucoStatus2 = document.getElementById('trucoStatus2');
+
     const editIcons = document.querySelectorAll('.edit-icon');
 
-    // Estado
     let scores = { team1: 0, team2: 0 };
     let victories = { team1: 0, team2: 0 };
-    // cada time terá um naipe atual (símbolo) e classe (diamond, spade, heart, club, joker)
+
     let teamData = {
         team1: { name: 'Time 1', suit: '♦', suitClass: 'diamond' },
-        team2: { name: 'Time 2', suit: '♦', suitClass: 'diamond' }
+        team2: { name: 'Time 2', suit: '♠', suitClass: 'spade' } // alterar para spade por padrão
     };
-    const naipes = ['diamond', 'spade', 'heart']; // melhor de 3 — 3 símbolos
+
+    const naipes = ['diamond', 'spade', 'heart'];
+
     let trucoAtivo = false;
     let trucoIndex = 0;
     const trucoValues = [3, 6, 9, 12];
+
     let valorMarcador = 1;
-    let valorMarcadorAnterior = 1; // Novo: guarda o valor anterior do marcador
+    let valorMarcadorAnterior = 1;
 
     function atualizarMarcadores() {
         document.querySelectorAll('.increase-btn').forEach(btn => {
             btn.textContent = `+${valorMarcador}`;
         });
-        // Mostrar botão "Voltar ao 1" se truco estiver em 12
+
         if (trucoAtivo && valorMarcador === 12) {
             resetTrucoBtn.style.display = 'inline-block';
-            mainTrucoBtn.style.display = 'none'; // esconde botão Truco
+            mainTrucoBtn.style.display = 'none';
         } else {
             resetTrucoBtn.style.display = 'none';
-            mainTrucoBtn.style.display = 'inline-block'; // mostra botão Truco normalmente
+            mainTrucoBtn.style.display = 'inline-block';
         }
     }
 
     function atualizarPlacar() {
         score1Els.forEach(el => el.textContent = scores.team1);
         score2Els.forEach(el => el.textContent = scores.team2);
-        // Desabilita Truco se algum time chegar a 11
-        if (scores.team1 >= 11 || scores.team2 >= 11) {
-            mainTrucoBtn.disabled = true;
-        } else {
-            mainTrucoBtn.disabled = false;
-        }
+
+        mainTrucoBtn.disabled = scores.team1 >= 11 || scores.team2 >= 11;
     }
 
     function atualizarVitorias() {
@@ -130,6 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
         scores.team2 = 0;
         atualizarPlacar();
         trucoAtivo = false;
+        trucoIndex = 0;
         valorMarcador = 1;
         atualizarMarcadores();
         mainTrucoBtn.textContent = 'Truco';
@@ -145,27 +184,26 @@ document.addEventListener('DOMContentLoaded', function () {
     function flipCard(team) {
         const card = document.querySelector(`#${team} .card`);
         card.classList.add('flip');
-        setTimeout(() => {
-            card.classList.remove('flip');
-        }, 500); // tempo igual ao transition do CSS
+        setTimeout(() => card.classList.remove('flip'), 500);
     }
 
-    // Pontuação
     document.querySelectorAll('.increase-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             if (isVictoryModalOpen()) return;
+
             const team = this.closest('.team').id === 'team1' ? 'team1' : 'team2';
             flipCard(team);
 
             setTimeout(() => {
                 scores[team] += valorMarcador;
+
                 if (scores[team] >= 12) {
                     scores[team] = 12;
                     mostrarVitoria(team);
                 }
+
                 atualizarPlacar();
 
-                // Se foi uma rodada de truco, resetar os botões
                 if (trucoAtivo) {
                     trucoAtivo = false;
                     trucoIndex = 0;
@@ -183,8 +221,10 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.decrease-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             if (isVictoryModalOpen()) return;
+
             const team = this.closest('.team').id === 'team1' ? 'team1' : 'team2';
-            flipCard(team); // flip ao remover ponto
+            flipCard(team);
+
             setTimeout(() => {
                 scores[team] = Math.max(0, scores[team] - 1);
                 atualizarPlacar();
@@ -192,22 +232,28 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Truco
     mainTrucoBtn.addEventListener('click', function () {
         if (!trucoAtivo) {
+
             trucoAtivo = true;
             trucoIndex = 0;
-            valorMarcadorAnterior = valorMarcador; // Salva valor anterior
+            valorMarcadorAnterior = valorMarcador;
             valorMarcador = trucoValues[trucoIndex];
-            atualizarMarcadores();
-            mainTrucoBtn.textContent = trucoValues[trucoIndex + 1] || 'Truco';
+
+            mainTrucoBtn.textContent = trucoValues[trucoIndex + 1];
             runBtn.style.display = 'inline-block';
+
             trucoStatus1.textContent = 'Rodada de Truco!';
             trucoStatus2.textContent = 'Rodada de Truco!';
+
+            atualizarMarcadores();
+
         } else if (trucoIndex < trucoValues.length - 1) {
+
             trucoIndex++;
-            valorMarcadorAnterior = valorMarcador; // Salva valor anterior
+            valorMarcadorAnterior = valorMarcador;
             valorMarcador = trucoValues[trucoIndex];
+
             mainTrucoBtn.textContent = trucoValues[trucoIndex + 1] || trucoValues[trucoIndex];
             atualizarMarcadores();
         }
@@ -225,10 +271,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     runBtn.addEventListener('click', function () {
-        // O time que corre perde só a rodada, não zera os pontos
         trucoAtivo = false;
         trucoIndex = 0;
-        // Ao correr, o adversário deve ganhar o valor anterior do marcador
         valorMarcador = valorMarcadorAnterior;
         atualizarMarcadores();
         mainTrucoBtn.textContent = 'Truco';
@@ -237,66 +281,52 @@ document.addEventListener('DOMContentLoaded', function () {
         trucoStatus2.textContent = '';
     });
 
-    // Vitória
     function mostrarVitoria(team) {
-        setTimeout(() => {
-            resetarRodada();
-        }, 500);
 
-        // Atualiza nome do time a partir do input (se existir) ou do localStorage
+        setTimeout(() => resetarRodada(), 500);
+
         const inputEl = document.querySelector(`#${team} .team-name`);
         const teamName = inputEl ? inputEl.value : teamData[team].name;
 
-        // Incrementa vitórias (melhor de 3)
         victories[team]++;
         atualizarVitorias();
 
-    // Define o naipe vencedor a partir do naipe atual do time (mantido internamente)
-    // Mas não exibimos o símbolo junto ao nome do time — mostramos apenas o nome.
-    // O naipe ainda é usado para atualização visual da carta.
-    // const winnerSuit = teamData[team].suit || (team === 'team1' ? '♦' : '♦');
-    victoryTeamName.textContent = teamName;
+        victoryTeamName.textContent = teamName;
         victoryModal.classList.add('active');
 
-        // Atualiza a carta visual do time para o próximo naipe (rotação simples)
         const card = document.querySelector(`#${team} .card`);
         if (card) {
-            // remove classes conhecidas
             card.classList.remove('diamond', 'spade', 'heart');
-            // pega a classe atual e avança (se quiser manter rotação visual)
-            const currentClass = teamData[team].suitClass || 'diamond';
-            const idx = naipes.indexOf(currentClass);
+
+            const current = teamData[team].suitClass;
+            const idx = naipes.indexOf(current);
             const nextClass = naipes[(idx + 1) % naipes.length];
+
             card.classList.add(nextClass);
-            // atualiza dado do time
             teamData[team].suitClass = nextClass;
-            // mapa de classe para símbolo
-            const classToSymbol = { diamond: '♦', spade: '♠', heart: '♥' };
-            teamData[team].suit = classToSymbol[nextClass] || '♦';
+
+            const map = { diamond: '♦', spade: '♠', heart: '♥' };
+            teamData[team].suit = map[nextClass];
         }
 
-        // Persistir vitórias e naipe no localStorage
         saveStateToLocalStorage();
 
-        // Se chegou a 2 vitórias => campeão do melhor de 3
         if (victories[team] >= 2) {
-            // destacar modal
-            const titleEl = victoryModal.querySelector('.victory-title');
-            if (titleEl) titleEl.textContent = 'CAMPEÃO!';
-            // desabilitar controles até o usuário resetar manualmente
+            const title = victoryModal.querySelector('.victory-title');
+            if (title) title.textContent = 'CAMPEÃO!';
+
             document.querySelectorAll('button, .increase-btn, .decrease-btn').forEach(b => b.disabled = true);
         }
     }
 
     closeVictory.addEventListener('click', () => {
         victoryModal.classList.remove('active');
-        // restaura título padrão
-        const titleEl = victoryModal.querySelector('.victory-title');
-        if (titleEl) titleEl.textContent = 'VITÓRIA!';
-        // resetar apenas a rodada (pontuação), manter vitórias. Se houve campeão, manter estado até reset manual.
+        const t = victoryModal.querySelector('.victory-title');
+        if (t) t.textContent = 'VITÓRIA!';
         resetarRodada();
         saveStateToLocalStorage();
     });
+
     victoryModal.addEventListener('click', e => {
         if (e.target === victoryModal) {
             victoryModal.classList.remove('active');
@@ -304,28 +334,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Reset
     resetPointsBtn.addEventListener('click', resetarRodada);
 
-    resetVictoriesBtn.addEventListener('click', function () {
+    resetVictoriesBtn.addEventListener('click', () => {
         victories.team1 = 0;
         victories.team2 = 0;
         atualizarVitorias();
-        // resetar naipes para padrão
+
         teamData.team1.suit = '♦';
         teamData.team1.suitClass = 'diamond';
-        teamData.team2.suit = '♦';
-        teamData.team2.suitClass = 'diamond';
-        const c1 = document.querySelector('#team1 .card');
-        const c2 = document.querySelector('#team2 .card');
-        if (c1) { c1.classList.remove('spade', 'heart'); c1.classList.add('diamond'); }
-        if (c2) { c2.classList.remove('spade', 'heart'); c2.classList.add('diamond'); }
 
-        // persiste
+        teamData.team2.suit = '♠';
+        teamData.team2.suitClass = 'spade';
+
+        document.querySelector('#team1 .card').className = 'card diamond';
+        document.querySelector('#team2 .card').className = 'card spade';
+
         saveStateToLocalStorage();
     });
 
-    // Editar nome do time
     editIcons.forEach(icon => {
         icon.addEventListener('click', function () {
             const input = this.previousElementSibling;
@@ -334,27 +361,26 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Inicialização
-    // Carrega dados salvos (nomes e naipes) e estado de vitórias
     function loadStateFromLocalStorage() {
         try {
             const teams = JSON.parse(localStorage.getItem('trucoTeams') || '{}');
+
             if (teams.nos) {
-                teamData.team1.name = teams.nos.name || teamData.team1.name;
-                teamData.team1.suit = teams.nos.suit || teamData.team1.suit;
-                // definir classe a partir do símbolo
-                teamData.team1.suitClass = teams.nos.suitClass || (teamData.team1.suit === '♠' ? 'spade' : (teamData.team1.suit === '♥' ? 'heart' : 'diamond'));
-            }
-            if (teams.eles) {
-                teamData.team2.name = teams.eles.name || teamData.team2.name;
-                teamData.team2.suit = teams.eles.suit || teamData.team2.suit;
-                teamData.team2.suitClass = teams.eles.suitClass || (teamData.team2.suit === '♠' ? 'spade' : (teamData.team2.suit === '♥' ? 'heart' : 'diamond'));
+                teamData.team1.name = teams.nos.name;
+                teamData.team1.suit = teams.nos.suit;
+                teamData.team1.suitClass = teams.nos.suitClass;
             }
 
-            // carregar vitórias se existirem
+            if (teams.eles) {
+                teamData.team2.name = teams.eles.name;
+                teamData.team2.suit = teams.eles.suit;
+                teamData.team2.suitClass = teams.eles.suitClass;
+            }
+
             const savedVictories = JSON.parse(localStorage.getItem('trucoVictories') || '{}');
-            if (typeof savedVictories.team1 === 'number') victories.team1 = savedVictories.team1;
-            if (typeof savedVictories.team2 === 'number') victories.team2 = savedVictories.team2;
+            victories.team1 = savedVictories.team1 || 0;
+            victories.team2 = savedVictories.team2 || 0;
+
         } catch (e) {
             console.error('Erro ao carregar estado:', e);
         }
@@ -366,86 +392,41 @@ document.addEventListener('DOMContentLoaded', function () {
                 nos: { name: teamData.team1.name, suit: teamData.team1.suit, suitClass: teamData.team1.suitClass },
                 eles: { name: teamData.team2.name, suit: teamData.team2.suit, suitClass: teamData.team2.suitClass }
             };
+
             localStorage.setItem('trucoTeams', JSON.stringify(teams));
-            const savedVictories = { team1: victories.team1, team2: victories.team2 };
-            localStorage.setItem('trucoVictories', JSON.stringify(savedVictories));
+            localStorage.setItem('trucoVictories', JSON.stringify(victories));
+
         } catch (e) {
-            console.error('Erro ao salvar estado:', e);
+            console.error('Erro ao salvar:', e);
         }
     }
 
     function applyTeamDataToUI() {
-        // Nomes
         const name1 = document.querySelector('#team1 .team-name');
         const name2 = document.querySelector('#team2 .team-name');
-        if (name1) name1.value = teamData.team1.name;
-        if (name2) name2.value = teamData.team2.name;
 
-        // Cartas (classe de naipe)
+        name1.value = teamData.team1.name;
+        name2.value = teamData.team2.name;
+
         const card1 = document.querySelector('#team1 .card');
         const card2 = document.querySelector('#team2 .card');
-        if (card1) {
-            card1.classList.remove('diamond', 'spade', 'heart');
-            card1.classList.add(teamData.team1.suitClass || 'diamond');
-        }
-        if (card2) {
-            card2.classList.remove('diamond', 'spade', 'heart');
-            card2.classList.add(teamData.team2.suitClass || 'diamond');
-        }
+
+        card1.classList.remove('diamond', 'spade', 'heart');
+        card1.classList.add(teamData.team1.suitClass);
+
+        card2.classList.remove('diamond', 'spade', 'heart');
+        card2.classList.add(teamData.team2.suitClass);
     }
 
-    // quando o usuário edita o nome no marcador, atualizamos localStorage
     document.querySelectorAll('.team-name').forEach((input, idx) => {
         input.addEventListener('change', () => {
             const key = idx === 0 ? 'team1' : 'team2';
-            teamData[key].name = input.value || teamData[key].name;
-            // salvar mudanças
+            teamData[key].name = input.value;
             saveStateToLocalStorage();
         });
     });
 
-    // Inicialização com carregamento
     loadStateFromLocalStorage();
     applyTeamDataToUI();
-    atualizarMarcadores();
-    atualizarPlacar();
     atualizarVitorias();
-
-    let wakeLock = null;
-
-    async function ativarWakeLock() {
-        try {
-            wakeLock = await navigator.wakeLock.request("screen");
-            console.log("🔒 Wake Lock ativado: tela não vai apagar!");
-        } catch (err) {
-            console.error("❌ Erro ao ativar Wake Lock:", err);
-        }
-    }
-
-    function liberarWakeLock() {
-        if (wakeLock) {
-            wakeLock.release();
-            wakeLock = null;
-            console.log("🔓 Wake Lock liberado: tela pode apagar.");
-        }
-    }
-
-    document.addEventListener("click", async function inicializarWakeLock() {
-        await ativarWakeLock();
-        // Remove o listener depois de ativar
-        document.removeEventListener("click", inicializarWakeLock);
-    });
-
-    // Se o usuário mudar de aba/janela, precisamos reativar
-    document.addEventListener("visibilitychange", () => {
-        if (wakeLock !== null && document.visibilityState === "visible") {
-            ativarWakeLock();
-        }
-    });
-
-    if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock("portrait").catch(err => {
-            console.warn("Não foi possível travar orientação:", err);
-        });
-    }
 });

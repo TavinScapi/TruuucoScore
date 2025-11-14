@@ -615,3 +615,11 @@ section {
     }
 }
 
+.skin-option.upload-option .skin-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255,255,255,0.02);
+    color: var(--text-secondary);
+}
+
