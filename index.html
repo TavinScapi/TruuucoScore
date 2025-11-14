@@ -10,6 +10,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-title" content="TS">
+    <meta name="google-site-verification" content="PuPg0kNDpVZGjIKGJW4nPzn_JVmw51N7rpTuWLsNiiI" />
 
     <!-- Ícones -->
     <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96">
@@ -140,6 +141,20 @@
                     </div>
                 </div>
 
+                <!-- Nova seção: escolha de skin -->
+                <div class="form-group">
+                    <label>Escolha a Skin da Carta</label>
+                    <div class="skin-options" id="skinOptions">
+                        <button type="button" class="skin-option" data-front="image/front-card.png" data-back="image/back-card.png" data-default="true">
+                            Padrão
+                        </button>
+                        <button type="button" class="skin-option" data-front="image/front-alt.png" data-back="image/back-alt.png">
+                            Alternativa
+                        </button>
+                        <!-- Adicione mais opções aqui apontando para arquivos relativos ao marcador (ex: image/front-xyz.png) -->
+                    </div>
+                </div>
+
                 <div class="modal-actions">
                     <button type="button" class="btn btn-cancel" id="cancelEdit">Cancelar</button>
                     <button type="submit" class="btn btn-save">Salvar</button>
@@ -159,6 +174,70 @@
             </div>
         </div>
     </div>
-</body>
 
+    <!-- Script local para salvar skin por time (não remove o script.js existente) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const editButtons = document.querySelectorAll('.edit-team');
+            const editModal = document.getElementById('editModal');
+            const skinOptions = document.querySelectorAll('#skinOptions .skin-option');
+            const form = document.getElementById('teamNameForm');
+
+            // Quando abrir o modal, guardamos qual time está sendo editado
+            editButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const team = btn.dataset.team; // "nos" ou "eles"
+                    editModal.dataset.currentTeam = team;
+
+                    // marca skin atual, se houver
+                    const raw = localStorage.getItem('teamSkin_' + team);
+                    let activeSet = false;
+                    if (raw) {
+                        try {
+                            const skin = JSON.parse(raw);
+                            skinOptions.forEach(opt => {
+                                if (opt.dataset.front === skin.front && opt.dataset.back === skin.back) {
+                                    opt.classList.add('active');
+                                    activeSet = true;
+                                } else {
+                                    opt.classList.remove('active');
+                                }
+                            });
+                        } catch { /* ignore */ }
+                    }
+                    if (!activeSet) {
+                        // marca padrão
+                        const def = document.querySelector('#skinOptions .skin-option[data-default="true"]');
+                        if (def) {
+                            skinOptions.forEach(opt => opt.classList.remove('active'));
+                            def.classList.add('active');
+                        }
+                    }
+                });
+            });
+
+            // selecionar skin visualmente
+            skinOptions.forEach(opt => {
+                opt.addEventListener('click', () => {
+                    skinOptions.forEach(o => o.classList.remove('active'));
+                    opt.classList.add('active');
+                });
+            });
+
+            // Ao salvar o form, grava a skin escolhida no localStorage por time.
+            form.addEventListener('submit', (e) => {
+                // mantém comportamento padrão do form (ou converta se seu script.js já tratar)
+                const team = editModal.dataset.currentTeam;
+                if (team) {
+                    const active = document.querySelector('#skinOptions .skin-option.active') || document.querySelector('#skinOptions .skin-option[data-default="true"]');
+                    if (active) {
+                        const skin = { front: active.dataset.front, back: active.dataset.back };
+                        localStorage.setItem('teamSkin_' + team, JSON.stringify(skin));
+                    }
+                }
+                // deixa qualquer outro código de salvamento continuar (evita preventDefault)
+            });
+        });
+    </script>
+</body>
 </html>

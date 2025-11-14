@@ -1,3 +1,36 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // Mapeamento: team1 corresponde ao time "nos", team2 a "eles"
+    const mapping = { team1: 'nos', team2: 'eles' };
+    Object.keys(mapping).forEach(teamId => {
+        const teamEl = document.getElementById(teamId);
+        if (!teamEl) return;
+        const key = 'teamSkin_' + mapping[teamId];
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        try {
+            const skin = JSON.parse(raw);
+            // procura os elementos .front e .back dentro da carta do time
+            const card = teamEl.querySelector('.card');
+            if (!card) return;
+            const front = card.querySelector('.front');
+            const back = card.querySelector('.back');
+            if (front && skin.front) {
+                front.style.backgroundImage = `url("${skin.front}")`;
+                // garante sizing parecido com o atual
+                front.style.backgroundSize = '120% 120%';
+                front.style.backgroundPosition = 'center';
+            }
+            if (back && skin.back) {
+                back.style.backgroundImage = `url("${skin.back}")`;
+                back.style.backgroundSize = '120% 121%';
+                back.style.backgroundPosition = 'center';
+            }
+        } catch (err) {
+            console.warn('erro ao aplicar skin:', err);
+        }
+    });
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     // Elementos
     const score1Els = document.querySelectorAll('.score1');
